@@ -15,6 +15,10 @@ public class MainMenuManager : MonoBehaviour
         //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
         StartCoroutine(SetOnDifficultyScreen(startTransform, endTransform, 1f));
     }
+    public void EasyGameButton()
+    {
+        SceneManager.LoadScene(1);
+    }
 
     public void CloseDifficultyButton()
     {
