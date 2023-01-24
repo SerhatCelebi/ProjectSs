@@ -21,6 +21,8 @@ public class EasyGameManager : MonoBehaviour
 
     int tempNumberPicker;
 
+    string str = "";
+
     [SerializeField] GameObject[] ObjUpLeft = new GameObject[9];
     [SerializeField] GameObject[] ObjUpMid = new GameObject[9];
     [SerializeField] GameObject[] ObjUpRight = new GameObject[9];
@@ -43,22 +45,52 @@ public class EasyGameManager : MonoBehaviour
 
     void Update()
     {
-        
+
     }
 
     public void CreateNumbers()
     {
-        for(int i = 0; i < 9; i++)
+        for(int i = 0; i < 9; i++) // For UpLeft Square
         {
             tempNumberPicker = Random.Range(0, oneToNine.Count);
-            Debug.Log("i: " + i + " // oneToNine.count : " + oneToNine.Count + " // tempNumberPicker: " + tempNumberPicker);
+            /*Debug.Log("i: " + i + " // oneToNine.count : " + oneToNine.Count + " // tempNumberPicker: " + tempNumberPicker);
             for(int j = 0; j < oneToNine.Count; j++)
             {
                 Debug.Log(oneToNine[j].ToString() + " -- ");
-            }
+            }*/
             UpLeft[i] = oneToNine[tempNumberPicker];
-            Debug.Log("UpLeft[" + i +"]: " + UpLeft[i]);
+            //Debug.Log("UpLeft[" + i +"]: " + UpLeft[i]);
             oneToNine.RemoveAt(tempNumberPicker);
+        }
+
+        for(int i = 0; i < 9; i++) // For UpMid Square
+        {
+            str = "possibleNumbers for upMid : ";
+            NumberAccuracyChecker.Instance.FindPossibleNumbers(Middle, BottomMid, UpMid, UpLeft, UpRight, i);
+            tempNumberPicker = Random.Range(0, NumberAccuracyChecker.Instance.possibleNumbers.Count);
+            Debug.Log("tempNumberPicker for UpMid : " + tempNumberPicker);
+            for (int z = 0; z < NumberAccuracyChecker.Instance.possibleNumbers.Count; z++)
+            {
+                str += NumberAccuracyChecker.Instance.possibleNumbers[z].ToString() + " -- ";
+            }
+            Debug.Log(str);
+            UpMid[i] = NumberAccuracyChecker.Instance.possibleNumbers[tempNumberPicker];
+            Debug.Log("UpMid-" + i + " : " + UpMid[i].ToString());
+        }
+
+        for (int i = 0; i < 9; i++) // For UpRight Square
+        {
+            str = " possibleNumbers for UpLeft : ";
+            NumberAccuracyChecker.Instance.FindPossibleNumbers(MiddleRight, BottomRight, UpRight, UpLeft, UpMid, i);
+            tempNumberPicker = Random.Range(0, NumberAccuracyChecker.Instance.possibleNumbers.Count);
+            Debug.Log("tempNumberPicker for UpRight : " + tempNumberPicker);
+            for (int z = 0; z < NumberAccuracyChecker.Instance.possibleNumbers.Count; z++)
+            {
+                str += NumberAccuracyChecker.Instance.possibleNumbers[z].ToString() + " -- ";
+            }
+            Debug.Log(str);
+            UpRight[i] = NumberAccuracyChecker.Instance.possibleNumbers[tempNumberPicker];
+            Debug.Log("UpRight-" + i + " : " + UpRight[i].ToString());
         }
     }
 
@@ -104,7 +136,7 @@ public class EasyGameManager : MonoBehaviour
             if (UpMid[i] > 0) ObjUpMid[i].GetComponent<Text>().text = UpMid[i].ToString();
             else ObjUpMid[i].GetComponent<Text>().text = " ";
             if (UpRight[i] > 0) ObjUpRight[i].GetComponent<Text>().text = UpRight[i].ToString();
-            ObjUpRight[i].GetComponent<Text>().text = " ";
+            else ObjUpRight[i].GetComponent<Text>().text = " ";
 
             if (MiddleLeft[i] > 0) ObjMiddleLeft[i].GetComponent<Text>().text = MiddleLeft[i].ToString();
             else ObjMiddleLeft[i].GetComponent<Text>().text = " ";
