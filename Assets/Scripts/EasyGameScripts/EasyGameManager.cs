@@ -5,8 +5,6 @@ using UnityEngine.UI;
 
 public class EasyGameManager : MonoBehaviour
 {
-    List<int> oneToNine = new List<int>();
-
     int[] UpLeft = new int[9];
     int[] UpMid = new int[9];
     int[] UpRight = new int[9];
@@ -19,9 +17,7 @@ public class EasyGameManager : MonoBehaviour
     int[] BottomMid = new int[9];
     int[] BottomRight = new int[9];
 
-    int tempNumberPicker;
-
-    string str = "";
+    public int[][] allSquares = new int[9][];
 
     [SerializeField] GameObject[] ObjUpLeft = new GameObject[9];
     [SerializeField] GameObject[] ObjUpMid = new GameObject[9];
@@ -36,67 +32,36 @@ public class EasyGameManager : MonoBehaviour
 
     void Start()
     {
-        ListRefill(oneToNine);
-        SetZero();
-        PushTable();
-        CreateNumbers();
+        allSquares[0] = UpLeft;
+        allSquares[1] = UpMid;
+        allSquares[2] = UpRight;
+        allSquares[3] = MiddleLeft;
+        allSquares[4] = Middle;
+        allSquares[5] = MiddleRight;
+        allSquares[6] = BottomLeft;
+        allSquares[7] = BottomMid;
+        allSquares[8] = BottomRight;
+        SudokuGenerator.Instance.GenerateSudoku(0, 3);
+        TakeNumbers();
     }
-
-
     void Update()
     {
-
+        
     }
-
-    public void CreateNumbers()
+    void TakeNumbers()
     {
-        for(int i = 0; i < 9; i++) // For UpLeft Square
+        for(int i = 0; i < 9; i++)
         {
-            tempNumberPicker = Random.Range(0, oneToNine.Count);
-            /*Debug.Log("i: " + i + " // oneToNine.count : " + oneToNine.Count + " // tempNumberPicker: " + tempNumberPicker);
-            for(int j = 0; j < oneToNine.Count; j++)
+            for(int j = 0; j < 9; j++)
             {
-                Debug.Log(oneToNine[j].ToString() + " -- ");
-            }*/
-            UpLeft[i] = oneToNine[tempNumberPicker];
-            //Debug.Log("UpLeft[" + i +"]: " + UpLeft[i]);
-            oneToNine.RemoveAt(tempNumberPicker);
-        }
-
-        for(int i = 0; i < 9; i++) // For UpMid Square
-        {
-            str = "possibleNumbers for upMid : ";
-            NumberAccuracyChecker.Instance.FindPossibleNumbers(Middle, BottomMid, UpMid, UpLeft, UpRight, i);
-            tempNumberPicker = Random.Range(0, NumberAccuracyChecker.Instance.possibleNumbers.Count);
-            Debug.Log("tempNumberPicker for UpMid : " + tempNumberPicker);
-            for (int z = 0; z < NumberAccuracyChecker.Instance.possibleNumbers.Count; z++)
-            {
-                str += NumberAccuracyChecker.Instance.possibleNumbers[z].ToString() + " -- ";
+                allSquares[i][j] = SudokuGenerator.Instance.Squares[i][j];
             }
-            Debug.Log(str);
-            UpMid[i] = NumberAccuracyChecker.Instance.possibleNumbers[tempNumberPicker];
-            Debug.Log("UpMid-" + i + " : " + UpMid[i].ToString());
-        }
-
-        for (int i = 0; i < 9; i++) // For UpRight Square
-        {
-            str = " possibleNumbers for UpLeft : ";
-            NumberAccuracyChecker.Instance.FindPossibleNumbers(MiddleRight, BottomRight, UpRight, UpLeft, UpMid, i);
-            tempNumberPicker = Random.Range(0, NumberAccuracyChecker.Instance.possibleNumbers.Count);
-            Debug.Log("tempNumberPicker for UpRight : " + tempNumberPicker);
-            for (int z = 0; z < NumberAccuracyChecker.Instance.possibleNumbers.Count; z++)
-            {
-                str += NumberAccuracyChecker.Instance.possibleNumbers[z].ToString() + " -- ";
-            }
-            Debug.Log(str);
-            UpRight[i] = NumberAccuracyChecker.Instance.possibleNumbers[tempNumberPicker];
-            Debug.Log("UpRight-" + i + " : " + UpRight[i].ToString());
         }
     }
 
     public void SetZero()
     {
-        for(int i = 0; i < 9; i++)
+        for (int i = 0; i < 9; i++)
         {
             UpLeft[i] = 0;
             UpMid[i] = 0;
@@ -109,50 +74,111 @@ public class EasyGameManager : MonoBehaviour
             BottomRight[i] = 0;
         }
     }
-
-    /*public void SetMinusOne()
-    {
-        for (int i = 0; i < 9; i++)
-        {
-            UpLeft[i] = -1;
-            UpMid[i] = -1;
-            UpRight[i] = -1;
-            MiddleLeft[i] = -1;
-            Middle[i] = -1;
-            MiddleRight[i] = -1;
-            BottomLeft[i] = -1;
-            BottomMid[i] = -1;
-            BottomRight[i] = -1;
-        }
-        PushTable();
-    }*/
-
     public void PushTable()
     {
+
         for (int i = 0; i < 9; i++)
         {
-            if (UpLeft[i] > 0) ObjUpLeft[i].GetComponent<Text>().text = UpLeft[i].ToString();
-            else ObjUpLeft[i].GetComponent<Text>().text = " ";
-            if (UpMid[i] > 0) ObjUpMid[i].GetComponent<Text>().text = UpMid[i].ToString();
-            else ObjUpMid[i].GetComponent<Text>().text = " ";
-            if (UpRight[i] > 0) ObjUpRight[i].GetComponent<Text>().text = UpRight[i].ToString();
-            else ObjUpRight[i].GetComponent<Text>().text = " ";
-
-            if (MiddleLeft[i] > 0) ObjMiddleLeft[i].GetComponent<Text>().text = MiddleLeft[i].ToString();
-            else ObjMiddleLeft[i].GetComponent<Text>().text = " ";
-            if (Middle[i] > 0) ObjMiddle[i].GetComponent<Text>().text = Middle[i].ToString();
-            else ObjMiddle[i].GetComponent<Text>().text = " ";
-            if (MiddleRight[i] > 0) ObjMiddleRight[i].GetComponent<Text>().text = MiddleRight[i].ToString();
-            else ObjMiddleRight[i].GetComponent<Text>().text = " ";
-
-            if (BottomLeft[i] > 0) ObjBottomLeft[i].GetComponent<Text>().text = BottomLeft[i].ToString();
-            else ObjBottomLeft[i].GetComponent<Text>().text = " ";
-            if (BottomMid[i] > 0) ObjBottomMid[i].GetComponent<Text>().text = BottomMid[i].ToString();
-            else ObjBottomMid[i].GetComponent<Text>().text = " ";
-            if (BottomRight[i] > 0) ObjBottomRight[i].GetComponent<Text>().text = BottomRight[i].ToString();
-            else ObjBottomRight[i].GetComponent<Text>().text = " ";
+            ObjUpLeft[i].GetComponent<Text>().text = UpLeft[i].ToString();
+            ObjUpMid[i].GetComponent<Text>().text = UpMid[i].ToString();
+            ObjUpRight[i].GetComponent<Text>().text = UpRight[i].ToString();
+            ObjMiddleLeft[i].GetComponent<Text>().text = MiddleLeft[i].ToString();
+            ObjMiddle[i].GetComponent<Text>().text = Middle[i].ToString();
+            ObjMiddleRight[i].GetComponent<Text>().text = MiddleRight[i].ToString();
+            ObjBottomLeft[i].GetComponent<Text>().text = BottomLeft[i].ToString();
+            ObjBottomMid[i].GetComponent<Text>().text = BottomMid[i].ToString();
+            ObjBottomRight[i].GetComponent<Text>().text = BottomRight[i].ToString();
         }
+
+        //int visibles = 55;
+        //int tempSquare, tempCell;
+
+        //while(visibles > 0)
+        //{
+        //    tempSquare = Random.Range(0, 9);
+        //    tempCell = Random.Range(0, 9);
+
+        //    switch (tempSquare)
+        //    {
+        //        case 0:
+        //            if(ObjUpLeft[tempCell].GetComponent<Text>().text != " ")
+        //            {
+        //                continue;
+        //            }
+        //            ObjUpLeft[tempCell].GetComponent<Text>().text = UpLeft[tempCell].ToString();
+        //            visibles--;
+        //            break;
+        //        case 1:
+        //            if (ObjUpMid[tempCell].GetComponent<Text>().text != " ")
+        //            {
+        //                continue;
+        //            }
+        //            ObjUpMid[tempCell].GetComponent<Text>().text = UpMid[tempCell].ToString();
+        //            visibles--;
+        //            break;
+        //        case 2:
+        //            if (ObjUpRight[tempCell].GetComponent<Text>().text != " ")
+        //            {
+        //                continue;
+        //            }
+        //            ObjUpRight[tempCell].GetComponent<Text>().text = UpRight[tempCell].ToString();
+        //            visibles--;
+        //            break;
+        //        case 3:
+        //            if (ObjMiddleLeft[tempCell].GetComponent<Text>().text != " ")
+        //            {
+        //                continue;
+        //            }
+        //            ObjMiddleLeft[tempCell].GetComponent<Text>().text = MiddleLeft[tempCell].ToString();
+        //            visibles--;
+        //            break;
+        //        case 4:
+        //            if (ObjMiddle[tempCell].GetComponent<Text>().text != " ")
+        //            {
+        //                continue;
+        //            }
+        //            ObjMiddle[tempCell].GetComponent<Text>().text = Middle[tempCell].ToString();
+        //            visibles--;
+        //            break;
+        //        case 5:
+        //            if (ObjMiddleRight[tempCell].GetComponent<Text>().text != " ")
+        //            {
+        //                continue;
+        //            }
+        //            ObjMiddleRight[tempCell].GetComponent<Text>().text = MiddleRight[tempCell].ToString();
+        //            visibles--;
+        //            break;
+        //        case 6:
+        //            if (ObjBottomLeft[tempCell].GetComponent<Text>().text != " ")
+        //            {
+        //                continue;
+        //            }
+        //            ObjBottomLeft[tempCell].GetComponent<Text>().text = BottomLeft[tempCell].ToString();
+        //            visibles--;
+        //            break;
+        //        case 7:
+        //            if (ObjBottomMid[tempCell].GetComponent<Text>().text != " ")
+        //            {
+        //                continue;
+        //            }
+        //            ObjBottomMid[tempCell].GetComponent<Text>().text = BottomMid[tempCell].ToString();
+        //            visibles--;
+        //            break;
+        //        case 8:
+        //            if (ObjBottomRight[tempCell].GetComponent<Text>().text != " ")
+        //            {
+        //                continue;
+        //            }
+        //            ObjBottomRight[tempCell].GetComponent<Text>().text = BottomRight[tempCell].ToString();
+        //            visibles--;
+        //            break;
+        //        default:
+        //            break;
+        //    }
+        //}
+
     }
+
 
     void ListRefill(List<int> lst)
     {

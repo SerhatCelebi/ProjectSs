@@ -5,9 +5,6 @@ using UnityEngine;
 public class NumberAccuracyChecker : MonoBehaviour
 {
     public static NumberAccuracyChecker Instance;
-    public List<int> possibleNumbers = new List<int>();
-
-    string str;
     private void Awake()
     {
         if (Instance == null)
@@ -16,124 +13,54 @@ public class NumberAccuracyChecker : MonoBehaviour
         }
     }
 
-    public void FindPossibleNumbers(int[] ver1, int[] ver2, int[] currSq, int[] hor1, int[] hor2, int currentCell)
+    public bool IsNumAccurate(int[] currSq, int[] ver1, int[] ver2, int[] hor1, int[] hor2, int currCell, int number)
     {
-        ListRefill(possibleNumbers);
-        //Debug.Log("Fonksiyona Girdi. currentCell : " + currentCell);
-        if(currentCell >= 0 && currentCell < 3) // If the current cell number is 0, 1 or 2
+
+        for (int i = 0; i < currCell; i++)
         {
-            //Debug.Log("0&3 If bloðuna girdi.");
-            for(int i = currentCell; i <= currentCell + 6; i+=3)
+            if (currSq[i] == number) return false;
+        }
+
+        if (currCell >= 0 && currCell < 3)
+        {
+            for (int i = currCell; i <= currCell + 6; i = i + 3)
             {
-                //Debug.Log("Vertical For Bloðuna girdi.");
-                if (possibleNumbers.Contains(ver1[i])) // Checking the first vertical neighbour square
-                {
-                    possibleNumbers.Remove(ver1[i]);
-                }
-                if (possibleNumbers.Contains(ver2[i])) // checking the second vertical neighbour square
-                {
-                    possibleNumbers.Remove(ver2[i]);
-                }
+                if (ver1[i] == number || ver2[i] == number) return false;
             }
-            for(int j = 0; j < 3; j++)
+            for (int i = 0; i < 3; i++)
             {
-                if (possibleNumbers.Contains(hor1[j])) // Checking the first horizontal neighbour square
-                {
-                    possibleNumbers.Remove(hor1[j]);
-                }
-                if (possibleNumbers.Contains(hor2[j])) // Checking the second horizontal neighbour square
-                {
-                    possibleNumbers.Remove(hor2[j]);
-                }
+                if (hor1[i] == number || hor2[i] == number) return false;
+            }
+        }
+        else if (currCell >= 3 && currCell < 6)
+        {
+            for (int i = currCell - 3; i <= currCell + 3; i = i + 3)
+            {
+                if (ver1[i] == number || ver2[i] == number) return false;
+            }
+            for (int i = 3; i < 6; i++)
+            {
+                if (hor1[i] == number || hor2[i] == number) return false;
+            }
+        }
+        else if (currCell >= 6 && currCell < 9)
+        {
+            for (int i = currCell - 6; i <= currCell; i = i + 3)
+            {
+                if (ver1[i] == number || ver2[i] == number) return false;
+            }
+            for (int i = 6; i < 9; i++)
+            {
+                if (hor1[i] == number || hor2[i] == number) return false;
             }
         }
 
-        else if (currentCell >= 3 && currentCell <= 5) // If the current cell number is 3, 4 or 5
-        {
-            for (int k = currentCell - 3; k <= currentCell + 3; k += 3)
-            {
-                if (possibleNumbers.Contains(ver1[k])) // Checking the first vertical neighbour square
-                {
-                    possibleNumbers.Remove(ver1[k]);
-                }
-                if (possibleNumbers.Contains(ver2[k])) // Checking the second vertical neighbour square
-                {
-                    possibleNumbers.Remove(ver2[k]);
-                }
-            }
-            for (int l = 3; l < 6; l++)
-            {
-                if (possibleNumbers.Contains(hor1[l])) // Checking the first horizontal neighbour square
-                {
-                    possibleNumbers.Remove(hor1[l]);
-                }
-                if (possibleNumbers.Contains(hor2[l])) // Checking the second horizontal neighbour square
-                {
-                    possibleNumbers.Remove(hor2[l]);
-                }
-            }
-        }
-
-        else if(currentCell >= 6 && currentCell <= 8) // If the current cell number is 6, 7 or 8
-        {
-            for(int m = currentCell - 6; m <= currentCell; m += 3)
-            {
-                if(possibleNumbers.Contains(ver1[m])) // Checking the first vertical neighbour square
-                {
-                    possibleNumbers.Remove(ver1[m]);
-                }
-                if (possibleNumbers.Contains(ver2[m])) // Checking the second vertical neighbour square
-                {
-                    possibleNumbers.Remove(ver2[m]);
-                }
-            }
-            for (int n = 6; n < 9; n++)
-            {
-                if (possibleNumbers.Contains(hor1[n])) // Checking the first horizontal neighbour square
-                {
-                    possibleNumbers.Remove(hor1[n]);
-                }
-                if (possibleNumbers.Contains(hor2[n])) // Checking the second horizontal neighbour square
-                {
-                    possibleNumbers.Remove(hor2[n]);
-                }
-            }
-        }
-        else
-        {
-            Debug.Log("Herhangi bir bloga girmedi... currentCell = " + currentCell);
-        }
-        for(int i = currentCell; i >= 0; i--)
-        {
-            if (possibleNumbers.Contains(currSq[i])) // Checking the current square
-            {
-                possibleNumbers.Remove(currSq[i]);
-            }
-        }
-
-        if(possibleNumbers.Count == 0)
-        {
-            Debug.Log(" **********************   EmptyList Hatasý Tespit Edildi..!    ****************************");
-            str = "Varsaylan Kare Ýçeriði : ";
-            for(int i = 0; i < 9; i++)
-            {
-                str += currSq[i].ToString() + " -- ";
-            }
-            Debug.Log(str);
-            EmptyListFixer(ver1, ver2, currSq, hor1, hor2, currentCell);
-        }
-        /*str = currentCell.ToString() + ". Hücre için : ";
-        for (int z = 0; z < possibleNumbers.Count; z++)
-        {
-            str += possibleNumbers[z].ToString() + " -- ";
-        }
-        Debug.Log(str);*/
-        //Debug.Log("i : " + currentCell.ToString());
+        return true;
     }
 
 
 
-    void EmptyListFixer(int[] ver1, int[] ver2, int[] currSq, int[] hor1, int[] hor2, int currentCell)
+    /*void EmptyListFixer(int[] ver1, int[] ver2, int[] currSq, int[] hor1, int[] hor2, int currentCell)
     {
         int count = 0;
         List<int> fixerNumbers = new List<int>();
@@ -271,20 +198,5 @@ public class NumberAccuracyChecker : MonoBehaviour
             count+=1;
             Debug.Log("count increased to '" + count + "' ..! *********************************************");
         }
-    }
-
-
-    void ListRefill(List<int> lst)
-    {
-        lst.Clear();
-        lst.Add(1);
-        lst.Add(2);
-        lst.Add(3);
-        lst.Add(4);
-        lst.Add(5);
-        lst.Add(6);
-        lst.Add(7);
-        lst.Add(8);
-        lst.Add(9);
-    }
+    }*/
 }
