@@ -12,6 +12,7 @@ public class NumberCell : MonoBehaviour, IPointerClickHandler
     public int squareIndex;
     public int cellIndex;
     public bool isSolved;
+    public bool isSelected;
 
     private void Awake()
     {
@@ -32,9 +33,13 @@ public class NumberCell : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log("Click");
-        EasyGameManager.Instance.CellSelected(squareIndex, cellIndex);
-        gameObject.transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.11f);
+        if (!isSelected && !isSolved)
+        {
+            Debug.Log("Click");
+            isSelected = true;
+            EasyGameManager.Instance.CellSelected(squareIndex, cellIndex);
+            //gameObject.transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.11f);
+        }
     }
 
 }

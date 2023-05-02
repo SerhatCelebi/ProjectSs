@@ -76,7 +76,7 @@ public class SudokuGenerator : MonoBehaviour
         {
             if (tmpSq >= 8)
             {
-                DebugSudoku();
+                //DebugSudoku();
                 return true;
             }
 
@@ -156,7 +156,7 @@ public class SudokuGenerator : MonoBehaviour
         }
     }
 
-    void DebugSudoku()
+    /*void DebugSudoku()
     {
         string str = " ";
 
@@ -322,5 +322,6 @@ public class SudokuGenerator : MonoBehaviour
             str += "  ";
         }
         Debug.Log(str);
-    }
+    }*/
+
 }
