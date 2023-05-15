@@ -37,6 +37,7 @@ public class MainMenuManager : MonoBehaviour
             yield return null;
         }
         difficultyScreen.GetComponent<RectTransform>().anchoredPosition = endTransform;
+        yield return null;
     }
 
     IEnumerator SetOffDifficultyScreen(Vector3 v_start, Vector3 v_end, float v_duration)
@@ -51,5 +52,6 @@ public class MainMenuManager : MonoBehaviour
         }
         difficultyScreen.GetComponent<RectTransform>().anchoredPosition = startTransform;
         difficultyScreen.SetActive(false);
+        yield return null;
     }
 }

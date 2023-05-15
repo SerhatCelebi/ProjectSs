@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class EasyGameManager : MonoBehaviour
 {
@@ -35,12 +36,17 @@ public class EasyGameManager : MonoBehaviour
 
     GameObject[][] allObjSquares = new GameObject[9][];
 
+    [SerializeField] GameObject pauseScreen;
+
     [SerializeField] GameObject mistakesText;
     [SerializeField] GameObject scoreText;
     [SerializeField] Text hintCountText;
+    [SerializeField] Text noteModeBoolText;
 
     int mistakes = 0, hintCount = 10;
     float score = 0f;
+
+    bool noteMode = false;
 
     private void Awake()
     {
@@ -93,6 +99,7 @@ public class EasyGameManager : MonoBehaviour
         }
         else
         {
+            CellHighlighter.Instance.TurnOffHighlights();
             allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSelected = false;
             allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0f);
             selectedIndexes[0] = slctdSq;
@@ -100,7 +107,7 @@ public class EasyGameManager : MonoBehaviour
             allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSelected = true;
             allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(1f, 1f, 0.2f, 0.31f);
         }
-
+        SendForHighlight();
     }
 
 
@@ -249,256 +256,17 @@ public class EasyGameManager : MonoBehaviour
                     break;
             }
         }
-            //int visibles = 55;
-            //int tempSquare, tempCell;
-
-            //while(visibles > 0)
-            //{
-            //    tempSquare = Random.Range(0, 9);
-            //    tempCell = Random.Range(0, 9);
-
-            //    switch (tempSquare)
-            //    {
-            //        case 0:
-            //            if(ObjUpLeft[tempCell].GetComponent<Text>().text != " ")
-            //            {
-            //                continue;
-            //            }
-            //            ObjUpLeft[tempCell].GetComponent<Text>().text = UpLeft[tempCell].ToString();
-            //            visibles--;
-            //            break;
-            //        case 1:
-            //            if (ObjUpMid[tempCell].GetComponent<Text>().text != " ")
-            //            {
-            //                continue;
-            //            }
-            //            ObjUpMid[tempCell].GetComponent<Text>().text = UpMid[tempCell].ToString();
-            //            visibles--;
-            //            break;
-            //        case 2:
-            //            if (ObjUpRight[tempCell].GetComponent<Text>().text != " ")
-            //            {
-            //                continue;
-            //            }
-            //            ObjUpRight[tempCell].GetComponent<Text>().text = UpRight[tempCell].ToString();
-            //            visibles--;
-            //            break;
-            //        case 3:
-            //            if (ObjMiddleLeft[tempCell].GetComponent<Text>().text != " ")
-            //            {
-            //                continue;
-            //            }
-            //            ObjMiddleLeft[tempCell].GetComponent<Text>().text = MiddleLeft[tempCell].ToString();
-            //            visibles--;
-            //            break;
-            //        case 4:
-            //            if (ObjMiddle[tempCell].GetComponent<Text>().text != " ")
-            //            {
-            //                continue;
-            //            }
-            //            ObjMiddle[tempCell].GetComponent<Text>().text = Middle[tempCell].ToString();
-            //            visibles--;
-            //            break;
-            //        case 5:
-            //            if (ObjMiddleRight[tempCell].GetComponent<Text>().text != " ")
-            //            {
-            //                continue;
-            //            }
-            //            ObjMiddleRight[tempCell].GetComponent<Text>().text = MiddleRight[tempCell].ToString();
-            //            visibles--;
-            //            break;
-            //        case 6:
-            //            if (ObjBottomLeft[tempCell].GetComponent<Text>().text != " ")
-            //            {
-            //                continue;
-            //            }
-            //            ObjBottomLeft[tempCell].GetComponent<Text>().text = BottomLeft[tempCell].ToString();
-            //            visibles--;
-            //            break;
-            //        case 7:
-            //            if (ObjBottomMid[tempCell].GetComponent<Text>().text != " ")
-            //            {
-            //                continue;
-            //            }
-            //            ObjBottomMid[tempCell].GetComponent<Text>().text = BottomMid[tempCell].ToString();
-            //            visibles--;
-            //            break;
-            //        case 8:
-            //            if (ObjBottomRight[tempCell].GetComponent<Text>().text != " ")
-            //            {
-            //                continue;
-            //            }
-            //            ObjBottomRight[tempCell].GetComponent<Text>().text = BottomRight[tempCell].ToString();
-            //            visibles--;
-            //            break;
-            //        default:
-            //            break;
-            //    }
-            //}
-
     }
 
-    public void Number1Button()
+    public void PauseButton()
     {
-        if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == 1 && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "1";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.cyan;
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
-            score += 100;
-            UpdateScoreText();
-        }
-        else if(!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "1";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.red;
-            mistakes++;
-            UpdateMistakesText();
-        }
+        pauseScreen.gameObject.SetActive(true);
+        Timer.Instance.StopTimer();
     }
-    public void Number2Button()
+    public void ContinueButton()
     {
-        if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == 2 && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "2";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.cyan;
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
-            score += 100;
-            UpdateScoreText();
-        }
-        else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "2";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.red;
-            mistakes++;
-            UpdateMistakesText();
-        }
-    }
-    public void Number3Button()
-    {
-        if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == 3 && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "3";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.cyan;
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
-            score += 100;
-            UpdateScoreText();
-        }
-        else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "3";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.red;
-            mistakes++;
-            UpdateMistakesText();
-        }
-    }
-    public void Number4Button()
-    {
-        if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == 4 && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "4";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.cyan;
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
-            score += 100;
-            UpdateScoreText();
-        }
-        else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "4";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.red;
-            mistakes++;
-            UpdateMistakesText();
-        }
-    }
-    public void Number5Button()
-    {
-        if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == 5 && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "5";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.cyan;
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
-            score += 100;
-            UpdateScoreText();
-        }
-        else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "5";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.red;
-            mistakes++;
-            UpdateMistakesText();
-        }
-    }
-    public void Number6Button()
-    {
-        if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == 6 && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "6";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.cyan;
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
-            score += 100;
-            UpdateScoreText();
-        }
-        else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "6";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.red;
-            mistakes++;
-            UpdateMistakesText();
-        }
-    }
-    public void Number7Button()
-    {
-        if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == 7 && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "7";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.cyan;
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
-            score += 100;
-            UpdateScoreText();
-        }
-        else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "7";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.red;
-            mistakes++;
-            UpdateMistakesText();
-        }
-    }
-    public void Number8Button()
-    {
-        if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == 8 && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "8";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.cyan;
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
-            score += 100;
-            UpdateScoreText();
-        }
-        else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "8";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.red;
-            mistakes++;
-            UpdateMistakesText();
-        }
-    }
-    public void Number9Button()
-    {
-        if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == 9 && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "9";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.cyan;
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
-            score += 100;
-            UpdateScoreText();
-        }
-        else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "9";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.red;
-            mistakes++;
-            UpdateMistakesText();
-        }
+        pauseScreen.gameObject.SetActive(false);
+        Timer.Instance.StartTimer();
     }
 
     public void EraseButton()
@@ -506,6 +274,20 @@ public class EasyGameManager : MonoBehaviour
         if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
         {
             allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = " ";
+            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().EraseNotes();
+        }
+    }
+    public void NoteModeButton()
+    {
+        if (noteMode)
+        {
+            noteMode = false;
+            noteModeBoolText.text = "Off";
+        }
+        else
+        {
+            noteMode = true;
+            noteModeBoolText.text = "On";
         }
     }
     public void HintButton()
@@ -536,33 +318,290 @@ public class EasyGameManager : MonoBehaviour
         scoreText.GetComponent<Text>().text = "Score : " + score.ToString();
     }
 
-    /*bool SendChecker(int Nm)
+    void SendForHighlight()
     {
         switch (selectedIndexes[0])
         {
             case 0:
-                return NumberAccuracyChecker.Instance.IsNumAccurate(UpLeft, MiddleLeft, BottomLeft, UpMid, UpRight, selectedIndexes[1], Nm);
+                CellHighlighter.Instance.HighlightCells(ObjUpLeft, ObjMiddleLeft, ObjBottomLeft, ObjUpMid, ObjUpRight, selectedIndexes[1]);
+                break;
             case 1:
-                return NumberAccuracyChecker.Instance.IsNumAccurate(UpMid, Middle, BottomMid, UpLeft, UpRight, selectedIndexes[1], Nm);
+                CellHighlighter.Instance.HighlightCells(ObjUpMid, ObjMiddle, ObjBottomMid, ObjUpLeft, ObjUpRight, selectedIndexes[1]);
+                break;
             case 2:
-                return NumberAccuracyChecker.Instance.IsNumAccurate(UpRight, MiddleRight, BottomRight, UpLeft, UpMid, selectedIndexes[1], Nm);
+                CellHighlighter.Instance.HighlightCells(ObjUpRight, ObjMiddleRight, ObjBottomRight, ObjUpLeft, ObjUpMid, selectedIndexes[1]);
+                break;
             case 3:
-                return NumberAccuracyChecker.Instance.IsNumAccurate(MiddleLeft, UpLeft, BottomLeft, Middle, MiddleRight, selectedIndexes[1], Nm);
+                CellHighlighter.Instance.HighlightCells(ObjMiddleLeft, ObjUpLeft, ObjBottomLeft, ObjMiddle, ObjMiddleRight, selectedIndexes[1]);
+                break;
             case 4:
-                return NumberAccuracyChecker.Instance.IsNumAccurate(Middle, UpMid, BottomMid, MiddleLeft, MiddleRight, selectedIndexes[1], Nm);
+                CellHighlighter.Instance.HighlightCells(ObjMiddle, ObjUpMid, ObjBottomMid, ObjMiddleLeft, ObjMiddleRight, selectedIndexes[1]);
+                break;
             case 5:
-                return NumberAccuracyChecker.Instance.IsNumAccurate(MiddleRight, UpRight, BottomRight, MiddleLeft, Middle, selectedIndexes[1], Nm);
+                CellHighlighter.Instance.HighlightCells(ObjMiddleRight, ObjUpRight, ObjBottomRight, ObjMiddleLeft, ObjMiddle, selectedIndexes[1]);
+                break;
             case 6:
-                return NumberAccuracyChecker.Instance.IsNumAccurate(BottomLeft, UpLeft, MiddleLeft, BottomMid, BottomRight, selectedIndexes[1], Nm);
+                CellHighlighter.Instance.HighlightCells(ObjBottomLeft, ObjUpLeft, ObjMiddleLeft, ObjBottomMid, ObjBottomRight, selectedIndexes[1]);
+                break;
             case 7:
-                return NumberAccuracyChecker.Instance.IsNumAccurate(BottomMid, UpMid, Middle, BottomLeft, BottomRight, selectedIndexes[1], Nm);
+                CellHighlighter.Instance.HighlightCells(ObjBottomMid, ObjUpMid, ObjMiddle, ObjBottomLeft, ObjBottomRight, selectedIndexes[1]);
+                break;
             case 8:
-                return NumberAccuracyChecker.Instance.IsNumAccurate(BottomRight, UpRight, MiddleRight, BottomLeft, BottomMid, selectedIndexes[1], Nm);
+                CellHighlighter.Instance.HighlightCells(ObjBottomRight, ObjUpRight, ObjMiddleRight, ObjBottomLeft, ObjBottomMid, selectedIndexes[1]);
+                break;
             default:
-                return false;
+                break;
         }
-    }*/
+    }
 
+    public void BackToMenuButton()
+    {
+        SceneManager.LoadScene(0);
+    }
+
+    public void Number1Button()
+    {
+        if (noteMode)
+        {
+            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().TakeNote(0);
+        }
+        else
+        {
+
+            if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == 1 && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "1";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.cyan;
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
+                score += 100;
+                UpdateScoreText();
+            }
+            else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "1";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.red;
+                mistakes++;
+                UpdateMistakesText();
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().EraseNotes();
+            }
+        }
+    }
+    public void Number2Button()
+    {
+        if (noteMode)
+        {
+            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().TakeNote(1);
+        }
+        else
+        {
+
+            if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == 2 && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "2";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.cyan;
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
+                score += 100;
+                UpdateScoreText();
+            }
+            else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "2";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.red;
+                mistakes++;
+                UpdateMistakesText();
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().EraseNotes();
+            }
+        }
+    }
+    public void Number3Button()
+    {
+        if (noteMode)
+        {
+            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().TakeNote(2);
+        }
+        else
+        {
+
+            if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == 3 && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "3";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.cyan;
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
+                score += 100;
+                UpdateScoreText();
+            }
+            else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "3";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.red;
+                mistakes++;
+                UpdateMistakesText();
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().EraseNotes();
+            }
+        }
+    }
+    public void Number4Button()
+    {
+        if (noteMode)
+        {
+            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().TakeNote(3);
+        }
+        else
+        {
+
+            if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == 4 && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "4";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.cyan;
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
+                score += 100;
+                UpdateScoreText();
+            }
+            else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "4";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.red;
+                mistakes++;
+                UpdateMistakesText();
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().EraseNotes();
+            }
+        }
+    }
+    public void Number5Button()
+    {
+        if (noteMode)
+        {
+            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().TakeNote(4);
+        }
+        else
+        {
+
+            if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == 5 && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "5";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.cyan;
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
+                score += 100;
+                UpdateScoreText();
+            }
+            else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "5";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.red;
+                mistakes++;
+                UpdateMistakesText();
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().EraseNotes();
+            }
+        }
+    }
+    public void Number6Button()
+    {
+        if (noteMode)
+        {
+            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().TakeNote(5);
+        }
+        else
+        {
+
+            if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == 6 && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "6";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.cyan;
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
+                score += 100;
+                UpdateScoreText();
+            }
+            else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "6";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.red;
+                mistakes++;
+                UpdateMistakesText();
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().EraseNotes();
+            }
+        }
+    }
+    public void Number7Button()
+    {
+        if (noteMode)
+        {
+            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().TakeNote(6);
+        }
+        else
+        {
+
+            if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == 7 && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "7";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.cyan;
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
+                score += 100;
+                UpdateScoreText();
+            }
+            else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "7";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.red;
+                mistakes++;
+                UpdateMistakesText();
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().EraseNotes();
+            }
+        }
+    }
+    public void Number8Button()
+    {
+        if (noteMode)
+        {
+            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().TakeNote(7);
+        }
+        else
+        {
+
+            if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == 8 && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "8";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.cyan;
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
+                score += 100;
+                UpdateScoreText();
+            }
+            else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "8";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.red;
+                mistakes++;
+                UpdateMistakesText();
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().EraseNotes();
+            }
+        }
+    }
+    public void Number9Button()
+    {
+        if (noteMode)
+        {
+            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().TakeNote(8);
+        }
+        else
+        {
+
+            if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == 9 && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "9";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.cyan;
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
+                score += 100;
+                UpdateScoreText();
+            }
+            else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = "9";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().color = Color.red;
+                mistakes++;
+                UpdateMistakesText();
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().EraseNotes();
+            }
+        }
+    }
     void ListRefill(List<int> lst)
     {
         lst.Clear();

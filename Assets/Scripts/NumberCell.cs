@@ -13,6 +13,7 @@ public class NumberCell : MonoBehaviour, IPointerClickHandler
     public int cellIndex;
     public bool isSolved;
     public bool isSelected;
+    public bool[] notedNumbers = new bool[9];
 
     private void Awake()
     {
@@ -31,14 +32,62 @@ public class NumberCell : MonoBehaviour, IPointerClickHandler
 
     }
 
+    public void TakeNote(int index)
+    {
+        if (notedNumbers[index])
+        {
+            notedNumbers[index] = false;
+        }
+        else
+        {
+            notedNumbers[index] = true;
+        }
+
+        if (!isSolved)
+        {
+            WriteNotedNumbers();
+        }
+    }
+    public void EraseNotes()
+    {
+        for(int i = 0; i < 9; i++)
+        {
+            notedNumbers[i] = false;
+        }
+    }
+    void WriteNotedNumbers()
+    {
+        string temp = " ";
+        for(int i = 0; i < 9; i++)
+        {
+            if (notedNumbers[i])
+            {
+                temp += (i+1).ToString();
+            }
+            else
+            {
+                temp += " ";
+            }
+
+            if(i == 2 || i == 5)
+            {
+                temp += "\n";
+            }
+            else if(i != 8)
+            {
+                temp += " ";
+            }
+        }
+        gameObject.GetComponent<Text>().color = Color.black;
+        gameObject.GetComponent<Text>().text = temp;
+    }
+
     public void OnPointerClick(PointerEventData eventData)
     {
         if (!isSelected && !isSolved)
         {
-            Debug.Log("Click");
             isSelected = true;
             EasyGameManager.Instance.CellSelected(squareIndex, cellIndex);
-            //gameObject.transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.11f);
         }
     }
 

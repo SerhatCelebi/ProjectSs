@@ -14,7 +14,7 @@ public class Timer : MonoBehaviour
 
     string timerStr = " ";
 
-    IEnumerator UT, ST;
+    Coroutine UT, ST;
 
     private void Awake()
     {
@@ -22,22 +22,31 @@ public class Timer : MonoBehaviour
         {
             Instance = this;
         }
+        Start();
     }
-    private void Start()
+    void Start()
     {
-        UT = UpdateTimer();
-        ST = StopTimerCase();
+        //UT = UpdateTimer();
+        //ST = StopTimerCase();
         SetDuration(0f, 0f);
     }
+
     public void StartTimer()
     {
-        StopCoroutine(ST);
-        StartCoroutine(UT);
+        if(ST != null)
+        {
+            StopCoroutine(ST);
+        }
+        UT = StartCoroutine(UpdateTimer());
+        timerText.color = Color.black;
     }
     public void StopTimer()
     {
-        StopCoroutine(UT);
-        StartCoroutine(ST);
+        if(UT != null)
+        {
+            StopCoroutine(UT);
+        }
+        ST = StartCoroutine(StopTimerCase());
     }
     public void SetDuration(float min, float sec)
     {
@@ -53,7 +62,7 @@ public class Timer : MonoBehaviour
 
     IEnumerator UpdateTimer()
     {
-        while (true)
+        while (durationMinute < 100)
         {
             yield return new WaitForSeconds(1f);
             if(durationSecond >= 59)
