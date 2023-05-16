@@ -34,13 +34,13 @@ public class NumberCell : MonoBehaviour, IPointerClickHandler
 
     public void TakeNote(int index)
     {
-        if (notedNumbers[index])
+        if (notedNumbers[index - 1])
         {
-            notedNumbers[index] = false;
+            notedNumbers[index - 1] = false;
         }
         else
         {
-            notedNumbers[index] = true;
+            notedNumbers[index - 1] = true;
         }
 
         if (!isSolved)

@@ -40,13 +40,22 @@ public class Timer : MonoBehaviour
         UT = StartCoroutine(UpdateTimer());
         timerText.color = Color.black;
     }
-    public void StopTimer()
+    public void PauseTimer()
     {
         if(UT != null)
         {
             StopCoroutine(UT);
         }
         ST = StartCoroutine(StopTimerCase());
+    }
+    public void StopTimer()
+    {
+        StopAllCoroutines();
+        SetDuration(0f, 0f);
+    }
+    public void ResetTimer()
+    {
+        SetDuration(0f, 0f);
     }
     public void SetDuration(float min, float sec)
     {
