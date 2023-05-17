@@ -8,6 +8,7 @@ public class CellHighlighter : MonoBehaviour
     public static CellHighlighter Instance;
 
     GameObject[] cellBackup = new GameObject[20];
+    GameObject currCellBackup;
     int index = 0;
 
     private void Awake()
@@ -44,6 +45,11 @@ public class CellHighlighter : MonoBehaviour
             {
                 currSq[i].transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.11f);
                 AddBackup(currSq[i]);
+            }
+            else if(i == currCell)
+            {
+                currSq[i].transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(1f, 1f, 0.2f, 0.31f);
+                currCellBackup = currSq[i];
             }
         }
 
@@ -106,6 +112,7 @@ public class CellHighlighter : MonoBehaviour
         {
             cellBackup[i].transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0f);
         }
+        currCellBackup.transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0f);
     }
 
 }

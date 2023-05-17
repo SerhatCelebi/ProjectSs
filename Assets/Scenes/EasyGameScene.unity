@@ -19367,6 +19367,7 @@ GameObject:
   - component: {fileID: 2046859650}
   - component: {fileID: 2046859651}
   - component: {fileID: 2046859652}
+  - component: {fileID: 2046859653}
   m_Layer: 0
   m_Name: EasyGameManagement
   m_TagString: Untagged
@@ -19575,6 +19576,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9997b53135122784eb877968ae67d692, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2046859653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2046859645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36d4a528e3a262543a3bca9c4ecaf2ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &2049740604

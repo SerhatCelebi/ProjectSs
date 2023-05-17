@@ -59,6 +59,7 @@ public class EasyGameManager : MonoBehaviour
     bool noteMode = false;
     bool isGameOver = false;
     bool isPaused = false;
+    bool isCellSelected = false;
 
     private void Awake()
     {
@@ -103,24 +104,33 @@ public class EasyGameManager : MonoBehaviour
 
     public void CellSelected(int slctdSq, int slctdCl)
     {
-        if(selectedIndexes[0] == -1 || selectedIndexes[1] == -1)
+        if (IsButtonAvailable())
         {
-            selectedIndexes[0] = slctdSq;
-            selectedIndexes[1] = slctdCl;
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSelected = true;
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(1f, 1f, 0.2f, 0.31f);
+            if (selectedIndexes[0] == -1 || selectedIndexes[1] == -1)
+            {
+                selectedIndexes[0] = slctdSq;
+                selectedIndexes[1] = slctdCl;
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSelected = true;
+                isCellSelected = true;
+                //allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(1f, 1f, 0.2f, 0.31f);
+            }
+            else
+            {
+                CellHighlighter.Instance.TurnOffHighlights();
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSelected = false;
+                //allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0f);
+                selectedIndexes[0] = slctdSq;
+                selectedIndexes[1] = slctdCl;
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSelected = true;
+                //allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(1f, 1f, 0.2f, 0.31f);
+            }
+            SendForHighlight();
         }
-        else
-        {
-            CellHighlighter.Instance.TurnOffHighlights();
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSelected = false;
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0f);
-            selectedIndexes[0] = slctdSq;
-            selectedIndexes[1] = slctdCl;
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSelected = true;
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(1f, 1f, 0.2f, 0.31f);
-        }
-        SendForHighlight();
+    }
+    public void SendToNumberHighlighter(int hlSq, int hlCl)
+    {
+        int num = allSquares[hlSq][hlCl];
+        NumberHighlighter.Instance.HighlightTheNumbers(allObjSquares, num);
     }
 
     /// <summary>
@@ -129,9 +139,17 @@ public class EasyGameManager : MonoBehaviour
 
     public void PauseButton()
     {
-        pauseScreen.gameObject.SetActive(true);
-        isPaused = true;
-        Timer.Instance.PauseTimer();
+        if (IsButtonAvailable())
+        {
+            pauseScreen.gameObject.SetActive(true);
+            isPaused = true;
+            UnselectCell();
+            Timer.Instance.PauseTimer();
+        }
+        else
+        {
+            ContinueButton();
+        }
     }
     public void RestartButton()
     {
@@ -146,10 +164,13 @@ public class EasyGameManager : MonoBehaviour
 
     public void EraseButton()
     {
-        if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+        if (IsButtonAvailable())
         {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = " ";
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().EraseNotes();
+            if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = " ";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().EraseNotes();
+            }
         }
     }
     public void NoteModeButton()
@@ -167,13 +188,16 @@ public class EasyGameManager : MonoBehaviour
     }
     public void HintButton()
     {
-        if(hintCount > 0)
+        if (IsButtonAvailable())
         {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = allSquares[selectedIndexes[0]][selectedIndexes[1]].ToString();
-            StartCoroutine(HintDeclaration(selectedIndexes[0], selectedIndexes[1]));
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
-            hintCount--;
-            hintCountText.text = hintCount.ToString();
+            if (hintCount > 0)
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = allSquares[selectedIndexes[0]][selectedIndexes[1]].ToString();
+                StartCoroutine(HintDeclaration(selectedIndexes[0], selectedIndexes[1]));
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
+                hintCount--;
+                hintCountText.text = hintCount.ToString();
+            }
         }
     }
     IEnumerator HintDeclaration(int i, int j)
@@ -202,44 +226,74 @@ public class EasyGameManager : MonoBehaviour
 
     public void BackToMenuButton()
     {
-        SceneManager.LoadScene(0);
+        if (IsButtonAvailable())
+        {
+            SceneManager.LoadScene(0);
+        }
     }
 
     public void Number1Button()
     {
-        CheckNumberButton(1);
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            CheckNumberButton(1);
+        }
     }
     public void Number2Button()
     {
-        CheckNumberButton(2);
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            CheckNumberButton(2);
+        }
     }
     public void Number3Button()
     {
-        CheckNumberButton(3);
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            CheckNumberButton(3);
+        }
     }
     public void Number4Button()
     {
-        CheckNumberButton(4);
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            CheckNumberButton(4);
+        }
     }
     public void Number5Button()
     {
-        CheckNumberButton(5);
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            CheckNumberButton(5);
+        }
     }
     public void Number6Button()
     {
-        CheckNumberButton(6);
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            CheckNumberButton(6);
+        }
     }
     public void Number7Button()
     {
-        CheckNumberButton(7);
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            CheckNumberButton(7);
+        }
     }
     public void Number8Button()
     {
-        CheckNumberButton(8);
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            CheckNumberButton(8);
+        }
     }
     public void Number9Button()
     {
-        CheckNumberButton(9);
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            CheckNumberButton(9);
+        }
     }
     void CheckNumberButton(int number)
     {
@@ -276,6 +330,7 @@ public class EasyGameManager : MonoBehaviour
     {
         isGameOver = true;
         gameOverScreen.SetActive(true);
+        UnselectCell();
         Timer.Instance.StopTimer();
     }
     void RestartGame()
@@ -318,6 +373,14 @@ public class EasyGameManager : MonoBehaviour
                 numberCounterText[i].gameObject.transform.parent.gameObject.SetActive(true);
             }
         }
+    }
+    void UnselectCell()
+    {
+        CellHighlighter.Instance.TurnOffHighlights();
+        allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSelected = false;
+        selectedIndexes[0] = -1;
+        selectedIndexes[1] = -1;
+        isCellSelected = false;
     }
     void SendForHighlight()
     {
@@ -394,6 +457,12 @@ public class EasyGameManager : MonoBehaviour
             numberCounter[number - 1]++;
             backupNumberCounter[number - 1]++;
         }
+    }
+    bool IsButtonAvailable()
+    {
+        if (isPaused) return false;
+        else if (isGameOver) return false;
+        else return true;
     }
     void PushTable()
     {

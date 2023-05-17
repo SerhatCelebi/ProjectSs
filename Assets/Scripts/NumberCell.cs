@@ -86,8 +86,17 @@ public class NumberCell : MonoBehaviour, IPointerClickHandler
     {
         if (!isSelected && !isSolved)
         {
-            isSelected = true;
-            EasyGameManager.Instance.CellSelected(squareIndex, cellIndex);
+            if(EasyGameManager.Instance != null)
+            {
+                EasyGameManager.Instance.CellSelected(squareIndex, cellIndex);
+            }
+        }
+        else if (isSolved)
+        {
+            if(EasyGameManager.Instance != null)
+            {
+                EasyGameManager.Instance.SendToNumberHighlighter(squareIndex, cellIndex);
+            }
         }
     }
 
