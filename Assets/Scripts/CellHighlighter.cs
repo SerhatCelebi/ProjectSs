@@ -5,19 +5,9 @@ using UnityEngine.UI;
 
 public class CellHighlighter : MonoBehaviour
 {
-    public static CellHighlighter Instance;
-
     GameObject[] cellBackup = new GameObject[20];
     GameObject currCellBackup;
     int index = 0;
-
-    private void Awake()
-    {
-        if(Instance == null)
-        {
-            Instance = this;
-        }
-    }
 
     void Start()
     {

@@ -1,11 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PossibleNumbersFinder : MonoBehaviour
 {
     public static PossibleNumbersFinder Instance;
     public List<int> possibleNumbers = new List<int>();
+
+    int temp;
+
     private void Awake()
     {
         if (Instance == null)
@@ -14,16 +18,22 @@ public class PossibleNumbersFinder : MonoBehaviour
         }
     }
 
-    public void FindPossibleNumbers(int[] currSq, int[] ver1, int[] ver2, int[] hor1, int[] hor2, int currCell)
+    public void FindPossibleNumbers(GameObject[] currSq, GameObject[] ver1, GameObject[] ver2, GameObject[] hor1, GameObject[] hor2, int currCell)
     {
         ListRefill(possibleNumbers);
-        Debug.Log("PossibleNumbersFinder...!");
+        //Debug.Log("PossibleNumbersFinder...!");
+
+
 
         for(int i = 0; i < currSq.Length; i++)
         {
-            if (possibleNumbers.Contains(currSq[i]))
+            if (currSq[i].GetComponent<NumberCell>().isSolved)
             {
-                possibleNumbers.Remove(currSq[i]);
+                int.TryParse(currSq[i].GetComponent<Text>().text, out temp);
+                if (possibleNumbers.Contains(temp))
+                {
+                    possibleNumbers.Remove(temp);
+                }
             }
         }
 
@@ -31,24 +41,40 @@ public class PossibleNumbersFinder : MonoBehaviour
         {
             for(int i = currCell; i <= currCell + 6; i = i + 3)
             {
-                if (possibleNumbers.Contains(ver1[i]))
+                if (ver1[i].GetComponent<NumberCell>().isSolved)
                 {
-                    possibleNumbers.Remove(ver1[i]);
+                    int.TryParse(currSq[i].GetComponent<Text>().text, out temp);
+                    if (possibleNumbers.Contains(temp))
+                    {
+                        possibleNumbers.Remove(temp);
+                    }
                 }
-                if (possibleNumbers.Contains(ver2[i]))
+                if (ver2[i].GetComponent<NumberCell>().isSolved)
                 {
-                    possibleNumbers.Remove(ver2[i]);
+                    int.TryParse(currSq[i].GetComponent<Text>().text, out temp);
+                    if (possibleNumbers.Contains(temp))
+                    {
+                        possibleNumbers.Remove(temp);
+                    }
                 }
             }
             for(int i = 0; i < 3; i++)
             {
-                if (possibleNumbers.Contains(hor1[i]))
+                if (hor1[i].GetComponent<NumberCell>().isSolved)
                 {
-                    possibleNumbers.Remove(hor1[i]);
+                    int.TryParse(currSq[i].GetComponent<Text>().text, out temp);
+                    if (possibleNumbers.Contains(temp))
+                    {
+                        possibleNumbers.Remove(temp);
+                    }
                 }
-                if (possibleNumbers.Contains(hor2[i]))
+                if (hor2[i].GetComponent<NumberCell>().isSolved)
                 {
-                    possibleNumbers.Remove(hor2[i]);
+                    int.TryParse(currSq[i].GetComponent<Text>().text, out temp);
+                    if (possibleNumbers.Contains(temp))
+                    {
+                        possibleNumbers.Remove(temp);
+                    }
                 }
             }
         }
@@ -56,24 +82,40 @@ public class PossibleNumbersFinder : MonoBehaviour
         {
             for(int i = currCell - 3; i <= currCell + 3; i = i + 3)
             {
-                if (possibleNumbers.Contains(ver1[i]))
+                if (ver1[i].GetComponent<NumberCell>().isSolved)
                 {
-                    possibleNumbers.Remove(ver1[i]);
+                    int.TryParse(currSq[i].GetComponent<Text>().text, out temp);
+                    if (possibleNumbers.Contains(temp))
+                    {
+                        possibleNumbers.Remove(temp);
+                    }
                 }
-                if (possibleNumbers.Contains(ver2[i]))
+                if (ver1[i].GetComponent<NumberCell>().isSolved)
                 {
-                    possibleNumbers.Remove(ver2[i]);
+                    int.TryParse(currSq[i].GetComponent<Text>().text, out temp);
+                    if (possibleNumbers.Contains(temp))
+                    {
+                        possibleNumbers.Remove(temp);
+                    }
                 }
             }
             for(int i = 3; i < 6; i++)
             {
-                if (possibleNumbers.Contains(hor1[i]))
+                if (hor1[i].GetComponent<NumberCell>().isSolved)
                 {
-                    possibleNumbers.Remove(hor1[i]);
+                    int.TryParse(currSq[i].GetComponent<Text>().text, out temp);
+                    if (possibleNumbers.Contains(temp))
+                    {
+                        possibleNumbers.Remove(temp);
+                    }
                 }
-                if (possibleNumbers.Contains(hor2[i]))
+                if (hor2[i].GetComponent<NumberCell>().isSolved)
                 {
-                    possibleNumbers.Remove(hor2[i]);
+                    int.TryParse(currSq[i].GetComponent<Text>().text, out temp);
+                    if (possibleNumbers.Contains(temp))
+                    {
+                        possibleNumbers.Remove(temp);
+                    }
                 }
             }
         }
@@ -81,29 +123,45 @@ public class PossibleNumbersFinder : MonoBehaviour
         {
             for(int i = currCell - 6; i <= currCell; i = i + 3)
             {
-                if (possibleNumbers.Contains(ver1[i]))
+                if (ver1[i].GetComponent<NumberCell>().isSolved)
                 {
-                    possibleNumbers.Remove(ver1[i]);
+                    int.TryParse(currSq[i].GetComponent<Text>().text, out temp);
+                    if (possibleNumbers.Contains(temp))
+                    {
+                        possibleNumbers.Remove(temp);
+                    }
                 }
-                if (possibleNumbers.Contains(ver2[i]))
+                if (ver1[i].GetComponent<NumberCell>().isSolved)
                 {
-                    possibleNumbers.Remove(ver2[i]);
+                    int.TryParse(currSq[i].GetComponent<Text>().text, out temp);
+                    if (possibleNumbers.Contains(temp))
+                    {
+                        possibleNumbers.Remove(temp);
+                    }
                 }
             }
             for(int i = 6; i < 9; i++)
             {
-                if (possibleNumbers.Contains(hor1[i]))
+                if (hor1[i].GetComponent<NumberCell>().isSolved)
                 {
-                    possibleNumbers.Remove(hor1[i]);
+                    int.TryParse(currSq[i].GetComponent<Text>().text, out temp);
+                    if (possibleNumbers.Contains(temp))
+                    {
+                        possibleNumbers.Remove(temp);
+                    }
                 }
-                if (possibleNumbers.Contains(hor2[i]))
+                if (hor2[i].GetComponent<NumberCell>().isSolved)
                 {
-                    possibleNumbers.Remove(hor2[i]);
+                    int.TryParse(currSq[i].GetComponent<Text>().text, out temp);
+                    if (possibleNumbers.Contains(temp))
+                    {
+                        possibleNumbers.Remove(temp);
+                    }
                 }
             }
         }
 
-        string str = "Possible Numbers(PossibleNumbersFinder) : ";
+        string str = "Possible Numbers(" + currCell + ") : ";
         for (int i = 0; i < possibleNumbers.Count; i++)
         {
             str += possibleNumbers[i].ToString() + " -- ";

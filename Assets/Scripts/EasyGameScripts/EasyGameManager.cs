@@ -4,10 +4,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class EasyGameManager : MonoBehaviour
+public class EasyGameManager : MonoBehaviour, ISelectable
 {
-    public static EasyGameManager Instance;
-
+    NumberHighlighter numberHighlighter;
+    CellHighlighter cellHighlighter;
     int[] UpLeft = new int[9];
     int[] UpMid = new int[9];
     int[] UpRight = new int[9];
@@ -41,17 +41,21 @@ public class EasyGameManager : MonoBehaviour
 
     GameObject[][] allObjSquares = new GameObject[9][];
 
+    bool[] isSquaresFilled = new bool[9];
+
     [SerializeField] GameObject pauseScreen;
     [SerializeField] GameObject gameOverScreen;
+    [SerializeField] GameObject endGameScreen;
 
     [SerializeField] Text mistakesText;
     [SerializeField] Text scoreText;
     [SerializeField] Text hintCountText;
     [SerializeField] Text noteModeBoolText;
+    [SerializeField] Text endGameText;
 
-    int hideCount = 31;
-    int[] backupHiddenSquare = new int[31];
-    int[] backupHiddenCell = new int[31];
+    static int hideCount = 31;
+    int[] backupHiddenSquare = new int[hideCount];
+    int[] backupHiddenCell = new int[hideCount];
 
     int mistakes = 0, hintCount = 10;
     float score = 0f;
@@ -60,14 +64,8 @@ public class EasyGameManager : MonoBehaviour
     bool isGameOver = false;
     bool isPaused = false;
     bool isCellSelected = false;
+    bool isGameEnded = false;
 
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-    }
     void Start()
     {
         allSquares[0] = UpLeft;
@@ -91,10 +89,13 @@ public class EasyGameManager : MonoBehaviour
         allObjSquares[8] = ObjBottomRight;
         selectedIndexes[0] = -1;
         selectedIndexes[1] = -1;
+        numberHighlighter = gameObject.GetComponent<NumberHighlighter>();
+        cellHighlighter = gameObject.GetComponent<CellHighlighter>();
         SudokuGenerator.Instance.GenerateSudoku(0, 3);
         TakeNumbers();
         PushTable();
         HideNumbers();
+        StartUpConfigs();
         Timer.Instance.StartTimer();
     }
     void Update()
@@ -102,230 +103,36 @@ public class EasyGameManager : MonoBehaviour
         
     }
 
-    public void CellSelected(int slctdSq, int slctdCl)
-    {
-        if (IsButtonAvailable())
-        {
-            if (selectedIndexes[0] == -1 || selectedIndexes[1] == -1)
-            {
-                selectedIndexes[0] = slctdSq;
-                selectedIndexes[1] = slctdCl;
-                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSelected = true;
-                isCellSelected = true;
-                //allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(1f, 1f, 0.2f, 0.31f);
-            }
-            else
-            {
-                CellHighlighter.Instance.TurnOffHighlights();
-                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSelected = false;
-                //allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0f);
-                selectedIndexes[0] = slctdSq;
-                selectedIndexes[1] = slctdCl;
-                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSelected = true;
-                //allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(1f, 1f, 0.2f, 0.31f);
-            }
-            SendForHighlight();
-        }
-    }
-    public void SendToNumberHighlighter(int hlSq, int hlCl)
-    {
-        int num = allSquares[hlSq][hlCl];
-        NumberHighlighter.Instance.HighlightTheNumbers(allObjSquares, num);
-    }
-
     /// <summary>
-    /// BUTTON METHODS ...........................................
+    /// Game Control Methods..!
     /// </summary>
 
-    public void PauseButton()
+    bool EndGameCheck()
     {
-        if (IsButtonAvailable())
+        /*for(int i = 0; i < 9; i++)
         {
-            pauseScreen.gameObject.SetActive(true);
-            isPaused = true;
-            UnselectCell();
-            Timer.Instance.PauseTimer();
-        }
-        else
-        {
-            ContinueButton();
-        }
-    }
-    public void RestartButton()
-    {
-        RestartGame();
-    }
-    public void ContinueButton()
-    {
-        pauseScreen.gameObject.SetActive(false);
-        isPaused = false;
-        Timer.Instance.StartTimer();
-    }
-
-    public void EraseButton()
-    {
-        if (IsButtonAvailable())
-        {
-            if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
-            {
-                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = " ";
-                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().EraseNotes();
-            }
-        }
-    }
-    public void NoteModeButton()
-    {
-        if (noteMode)
-        {
-            noteMode = false;
-            noteModeBoolText.text = "Off";
-        }
-        else
-        {
-            noteMode = true;
-            noteModeBoolText.text = "On";
-        }
-    }
-    public void HintButton()
-    {
-        if (IsButtonAvailable())
-        {
-            if (hintCount > 0)
-            {
-                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = allSquares[selectedIndexes[0]][selectedIndexes[1]].ToString();
-                StartCoroutine(HintDeclaration(selectedIndexes[0], selectedIndexes[1]));
-                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
-                hintCount--;
-                hintCountText.text = hintCount.ToString();
-            }
-        }
-    }
-    IEnumerator HintDeclaration(int i, int j)
-    {
-        allObjSquares[i][j].gameObject.GetComponent<Text>().color = new Color(0.625f, 0f, 0.625f);
-        yield return new WaitForSeconds(1.5f);
-        allObjSquares[i][j].gameObject.GetComponent<Text>().color = Color.cyan;
-        yield return null;
-    }
-
-    void UpdateMistakesText()
-    {
-        mistakesText.text = "Mistakes : " + mistakes.ToString() + " / 5";
-    }
-    void UpdateScoreText()
-    {
-        scoreText.text = "Score : " + score.ToString();
-    }
-    void UpdateNumberCounterText()
-    {
+            Debug.Log("Square " + i + " : " + isSquaresFilled[i]);
+        }*/
         for(int i = 0; i < 9; i++)
         {
-            numberCounterText[i].text = numberCounter[i].ToString();
-        }
-    }
-
-    public void BackToMenuButton()
-    {
-        if (IsButtonAvailable())
-        {
-            SceneManager.LoadScene(0);
-        }
-    }
-
-    public void Number1Button()
-    {
-        if (IsButtonAvailable() && isCellSelected)
-        {
-            CheckNumberButton(1);
-        }
-    }
-    public void Number2Button()
-    {
-        if (IsButtonAvailable() && isCellSelected)
-        {
-            CheckNumberButton(2);
-        }
-    }
-    public void Number3Button()
-    {
-        if (IsButtonAvailable() && isCellSelected)
-        {
-            CheckNumberButton(3);
-        }
-    }
-    public void Number4Button()
-    {
-        if (IsButtonAvailable() && isCellSelected)
-        {
-            CheckNumberButton(4);
-        }
-    }
-    public void Number5Button()
-    {
-        if (IsButtonAvailable() && isCellSelected)
-        {
-            CheckNumberButton(5);
-        }
-    }
-    public void Number6Button()
-    {
-        if (IsButtonAvailable() && isCellSelected)
-        {
-            CheckNumberButton(6);
-        }
-    }
-    public void Number7Button()
-    {
-        if (IsButtonAvailable() && isCellSelected)
-        {
-            CheckNumberButton(7);
-        }
-    }
-    public void Number8Button()
-    {
-        if (IsButtonAvailable() && isCellSelected)
-        {
-            CheckNumberButton(8);
-        }
-    }
-    public void Number9Button()
-    {
-        if (IsButtonAvailable() && isCellSelected)
-        {
-            CheckNumberButton(9);
-        }
-    }
-    void CheckNumberButton(int number)
-    {
-        if (noteMode)
-        {
-            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<NumberCell>().TakeNote(number);
-        }
-        else
-        {
-
-            if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == number && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<NumberCell>().isSolved))
+            if (!isSquaresFilled[i])
             {
-                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<Text>().text = number.ToString();
-                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<Text>().color = Color.cyan;
-                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<NumberCell>().isSolved = true;
-                score += 100;
-                UpdateScoreText();
-                UpdateNumberCounter(number, true);
-                UpdateNumberCounterText();
-            }
-            else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<NumberCell>().isSolved))
-            {
-                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<Text>().text = number.ToString();
-                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<Text>().color = Color.red;
-                mistakes++;
-                if (mistakes >= 5) GameOverCase();
-                UpdateMistakesText();
-                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<NumberCell>().EraseNotes();
+                return false;
             }
         }
+        return true;
     }
 
+    void EndGameCase()
+    {
+        float duration = Timer.Instance.GetDuration();
+        float tempMin = (int)duration / 60;
+        float tempSec = (int)duration - (60 * tempMin);
+        Timer.Instance.StopTimer();
+        isGameEnded = true;
+        endGameScreen.SetActive(true);
+        endGameText.text = "Score : " + score + "\n\nTime : " + tempMin + ":" + tempSec + "\n\nMistakes : " + mistakes;
+    }
     void GameOverCase()
     {
         isGameOver = true;
@@ -339,18 +146,28 @@ public class EasyGameManager : MonoBehaviour
         mistakes = 0;
         ReHideNumbers();
         isGameOver = false;
+        isPaused = false;
+        isGameEnded = false;
         gameOverScreen.SetActive(false);
         pauseScreen.SetActive(false);
+        endGameScreen.SetActive(false);
         UpdateMistakesText();
         UpdateScoreText();
         ActivateNumberButtons();
         UseNumberCounterBackup();
         UpdateNumberCounterText();
+        UnselectCell();
+        for (int i = 0; i < 9; i++)
+        {
+            isSquaresFilled[i] = false;
+        }
+        StartUpConfigs();
+        Timer.Instance.SetDuration(0f, 0f);
         Timer.Instance.StartTimer();
     }
     void ReHideNumbers()
     {
-        for (int i = 0; i < 31; i++)
+        for (int i = 0; i < hideCount; i++)
         {
             allObjSquares[backupHiddenSquare[i]][backupHiddenCell[i]].GetComponent<Text>().text = " ";
             allObjSquares[backupHiddenSquare[i]][backupHiddenCell[i]].GetComponent<NumberCell>().isSolved = false;
@@ -374,47 +191,281 @@ public class EasyGameManager : MonoBehaviour
             }
         }
     }
+    //************************************************************************************************************************************************
+
+
+
+    /// <summary>
+    /// Button Methods..!
+    /// </summary>
+
+    public void PauseButton()
+    {
+        AudioManager.Instance.Play("Click");
+        if (IsButtonAvailable())
+        {
+            pauseScreen.gameObject.SetActive(true);
+            isPaused = true;
+            UnselectCell();
+            Timer.Instance.PauseTimer();
+        }
+        else
+        {
+            ContinueButton();
+        }
+    }
+    public void RestartButton()
+    {
+        AudioManager.Instance.Play("Click");
+        RestartGame();
+    }
+    public void ContinueButton()
+    {
+        AudioManager.Instance.Play("Click");
+        pauseScreen.gameObject.SetActive(false);
+        isPaused = false;
+        Timer.Instance.StartTimer();
+    }
+
+    public void EraseButton()
+    {
+        AudioManager.Instance.Play("Click");
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = " ";
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().EraseNotes();
+            }
+        }
+    }
+    public void NoteModeButton()
+    {
+        AudioManager.Instance.Play("Click");
+        if (IsButtonAvailable())
+        {
+            if (noteMode)
+            {
+                noteMode = false;
+                noteModeBoolText.text = "Off";
+            }
+            else
+            {
+                noteMode = true;
+                noteModeBoolText.text = "On";
+            }
+        }
+    }
+    public void HintButton()
+    {
+        AudioManager.Instance.Play("Click");
+        if (!allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<NumberCell>().isSolved)
+        {
+            if (IsButtonAvailable() && isCellSelected)
+            {
+                if (hintCount > 0)
+                {
+                    allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<Text>().text = allSquares[selectedIndexes[0]][selectedIndexes[1]].ToString();
+                    StartCoroutine(HintDeclaration(selectedIndexes[0], selectedIndexes[1]));
+                    allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
+                    UpdateNumberCounter(allSquares[selectedIndexes[0]][selectedIndexes[1]], true);
+                    UpdateNumberCounterText();
+                    //hintCount--;
+                    hintCountText.text = hintCount.ToString();
+                    isSquaresFilled[selectedIndexes[0]] = gameObject.GetComponent<FilledSquareChecker>().CheckSquareIsFilled(allObjSquares[selectedIndexes[0]]);
+                    if (EndGameCheck())
+                    {
+                        EndGameCase();
+                    }
+                }
+            }
+        }
+    }
+    IEnumerator HintDeclaration(int i, int j)
+    {
+        allObjSquares[i][j].gameObject.GetComponent<Text>().color = new Color(0.625f, 0f, 0.625f);
+        yield return new WaitForSeconds(1.5f);
+        allObjSquares[i][j].gameObject.GetComponent<Text>().color = Color.cyan;
+        yield return null;
+    }
+
+    public void BackToMenuButton()
+    {
+        AudioManager.Instance.Play("Click");
+        if (IsButtonAvailable())
+        {
+            SceneManager.LoadScene(0);
+        }
+    }
+    public void Number1Button()
+    {
+        AudioManager.Instance.Play("Click");
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            CheckNumberButton(1);
+        }
+    }
+    public void Number2Button()
+    {
+        AudioManager.Instance.Play("Click");
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            CheckNumberButton(2);
+        }
+    }
+    public void Number3Button()
+    {
+        AudioManager.Instance.Play("Click");
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            CheckNumberButton(3);
+        }
+    }
+    public void Number4Button()
+    {
+        AudioManager.Instance.Play("Click");
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            CheckNumberButton(4);
+        }
+    }
+    public void Number5Button()
+    {
+        AudioManager.Instance.Play("Click");
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            CheckNumberButton(5);
+        }
+    }
+    public void Number6Button()
+    {
+        AudioManager.Instance.Play("Click");
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            CheckNumberButton(6);
+        }
+    }
+    public void Number7Button()
+    {
+        AudioManager.Instance.Play("Click");
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            CheckNumberButton(7);
+        }
+    }
+    public void Number8Button()
+    {
+        AudioManager.Instance.Play("Click");
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            CheckNumberButton(8);
+        }
+    }
+    public void Number9Button()
+    {
+        AudioManager.Instance.Play("Click");
+        if (IsButtonAvailable() && isCellSelected)
+        {
+            CheckNumberButton(9);
+        }
+    }
+    //************************************************************************************************************************************************
+
+
+
+    /// <summary>
+    /// Gameplay Methods..!
+    /// </summary>
+
+    void CheckNumberButton(int number)
+    {
+        if (noteMode)
+        {
+            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<NumberCell>().TakeNote(number);
+        }
+        else
+        {
+            if (allSquares[selectedIndexes[0]][selectedIndexes[1]] == number && !(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<Text>().text = number.ToString();
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<Text>().color = Color.cyan;
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<NumberCell>().isSolved = true;
+                score += 100;
+                UpdateScoreText();
+                UpdateNumberCounter(number, true);
+                UpdateNumberCounterText();
+                isSquaresFilled[selectedIndexes[0]] = gameObject.GetComponent<FilledSquareChecker>().CheckSquareIsFilled(allObjSquares[selectedIndexes[0]]);
+                if (EndGameCheck())
+                {
+                    EndGameCase();
+                }
+            }
+            else if (!(allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<NumberCell>().isSolved))
+            {
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<Text>().text = number.ToString();
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<Text>().color = Color.red;
+                mistakes++;
+                UpdateMistakesText();
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<NumberCell>().EraseNotes();
+                if (mistakes >= 5) GameOverCase();
+            }
+        }
+    }
+    public void CellSelected(int slctdSq, int slctdCl)
+    {
+        if (IsButtonAvailable())
+        {
+            if (selectedIndexes[0] == -1 || selectedIndexes[1] == -1)
+            {
+                selectedIndexes[0] = slctdSq;
+                selectedIndexes[1] = slctdCl;
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSelected = true;
+                isCellSelected = true;
+                //allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(1f, 1f, 0.2f, 0.31f);
+            }
+            else
+            {
+                //CellHighlighter.Instance.TurnOffHighlights();
+                cellHighlighter.TurnOffHighlights();
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSelected = false;
+                //allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0f);
+                selectedIndexes[0] = slctdSq;
+                selectedIndexes[1] = slctdCl;
+                allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSelected = true;
+                //allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.transform.GetChild(0).gameObject.GetComponent<Image>().color = new Color(1f, 1f, 0.2f, 0.31f);
+            }
+            SendForHighlight();
+        }
+    }
     void UnselectCell()
     {
-        CellHighlighter.Instance.TurnOffHighlights();
-        allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSelected = false;
-        selectedIndexes[0] = -1;
-        selectedIndexes[1] = -1;
-        isCellSelected = false;
-    }
-    void SendForHighlight()
-    {
-        switch (selectedIndexes[0])
+        if (isCellSelected)
         {
-            case 0:
-                CellHighlighter.Instance.HighlightCells(ObjUpLeft, ObjMiddleLeft, ObjBottomLeft, ObjUpMid, ObjUpRight, selectedIndexes[1]);
-                break;
-            case 1:
-                CellHighlighter.Instance.HighlightCells(ObjUpMid, ObjMiddle, ObjBottomMid, ObjUpLeft, ObjUpRight, selectedIndexes[1]);
-                break;
-            case 2:
-                CellHighlighter.Instance.HighlightCells(ObjUpRight, ObjMiddleRight, ObjBottomRight, ObjUpLeft, ObjUpMid, selectedIndexes[1]);
-                break;
-            case 3:
-                CellHighlighter.Instance.HighlightCells(ObjMiddleLeft, ObjUpLeft, ObjBottomLeft, ObjMiddle, ObjMiddleRight, selectedIndexes[1]);
-                break;
-            case 4:
-                CellHighlighter.Instance.HighlightCells(ObjMiddle, ObjUpMid, ObjBottomMid, ObjMiddleLeft, ObjMiddleRight, selectedIndexes[1]);
-                break;
-            case 5:
-                CellHighlighter.Instance.HighlightCells(ObjMiddleRight, ObjUpRight, ObjBottomRight, ObjMiddleLeft, ObjMiddle, selectedIndexes[1]);
-                break;
-            case 6:
-                CellHighlighter.Instance.HighlightCells(ObjBottomLeft, ObjUpLeft, ObjMiddleLeft, ObjBottomMid, ObjBottomRight, selectedIndexes[1]);
-                break;
-            case 7:
-                CellHighlighter.Instance.HighlightCells(ObjBottomMid, ObjUpMid, ObjMiddle, ObjBottomLeft, ObjBottomRight, selectedIndexes[1]);
-                break;
-            case 8:
-                CellHighlighter.Instance.HighlightCells(ObjBottomRight, ObjUpRight, ObjMiddleRight, ObjBottomLeft, ObjBottomMid, selectedIndexes[1]);
-                break;
-            default:
-                break;
+            //CellHighlighter.Instance.TurnOffHighlights();
+            cellHighlighter.TurnOffHighlights();
+            allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSelected = false;
+            selectedIndexes[0] = -1;
+            selectedIndexes[1] = -1;
+            isCellSelected = false;
+        }
+    }
+    //************************************************************************************************************************************************
+
+
+
+    /// <summary>
+    /// Startup Methods..!
+    /// </summary>
+
+    void StartUpConfigs()
+    {
+        for (int i = 0; i < 9; i++)
+        {
+            isSquaresFilled[i] = gameObject.GetComponent<FilledSquareChecker>().CheckSquareIsFilled(allObjSquares[i]);
+            if (numberCounter[i] == 0)
+            {
+                numberCounterText[i].gameObject.transform.parent.gameObject.SetActive(false);
+            }
         }
     }
     void TakeNumbers()
@@ -426,43 +477,6 @@ public class EasyGameManager : MonoBehaviour
                 allSquares[i][j] = SudokuGenerator.Instance.Squares[i][j];
             }
         }
-    }
-    public void SetZero()
-    {
-        for (int i = 0; i < 9; i++)
-        {
-            UpLeft[i] = 0;
-            UpMid[i] = 0;
-            UpRight[i] = 0;
-            MiddleLeft[i] = 0;
-            Middle[i] = 0;
-            MiddleRight[i] = 0;
-            BottomLeft[i] = 0;
-            BottomMid[i] = 0;
-            BottomRight[i] = 0;
-        }
-    }
-    void UpdateNumberCounter(int number, bool isSubtraction)
-    {
-        if (isSubtraction)
-        {
-            numberCounter[number - 1]--;
-            if(numberCounter[number - 1] == 0)
-            {
-                numberCounterText[number -1].gameObject.transform.parent.gameObject.SetActive(false);
-            }
-        }
-        else
-        {
-            numberCounter[number - 1]++;
-            backupNumberCounter[number - 1]++;
-        }
-    }
-    bool IsButtonAvailable()
-    {
-        if (isPaused) return false;
-        else if (isGameOver) return false;
-        else return true;
     }
     void PushTable()
     {
@@ -499,13 +513,13 @@ public class EasyGameManager : MonoBehaviour
     void HideNumbers()
     {
         int tempSquare, tempCell;
-
+        int tempHide = hideCount;
         while (hideCount > 0)
         {
             tempSquare = Random.Range(0, 9);
             tempCell = Random.Range(0, 9);
-            backupHiddenSquare[31 - hideCount] = tempSquare;
-            backupHiddenCell[31 - hideCount] = tempCell;
+            backupHiddenSquare[tempHide - hideCount] = tempSquare;
+            backupHiddenCell[tempHide - hideCount] = tempCell;
 
             switch (tempSquare)
             {
@@ -596,7 +610,128 @@ public class EasyGameManager : MonoBehaviour
         }
         UpdateNumberCounterText();
     }
-    void ListRefill(List<int> lst)
+    //************************************************************************************************************************************************
+
+
+
+    /// <summary>
+    /// Update Methods..!
+    /// </summary>
+
+    void UpdateMistakesText()
+    {
+        mistakesText.text = "Mistakes : " + mistakes.ToString() + " / 5";
+    }
+    void UpdateScoreText()
+    {
+        scoreText.text = "Score : " + score.ToString();
+    }
+    void UpdateNumberCounterText()
+    {
+        for (int i = 0; i < 9; i++)
+        {
+            numberCounterText[i].text = numberCounter[i].ToString();
+        }
+    }
+    void UpdateNumberCounter(int number, bool isSubtraction)
+    {
+        if (isSubtraction)
+        {
+            numberCounter[number - 1]--;
+            if (numberCounter[number - 1] == 0)
+            {
+                numberCounterText[number - 1].gameObject.transform.parent.gameObject.SetActive(false);
+            }
+        }
+        else
+        {
+            numberCounter[number - 1]++;
+            backupNumberCounter[number - 1]++;
+        }
+    }
+    bool IsButtonAvailable()
+    {
+        if (isPaused) return false;
+        else if (isGameOver) return false;
+        else if(isGameEnded) return false;
+        else return true;
+    }
+    //************************************************************************************************************************************************
+
+    /// <summary>
+    /// Sending Methods..!
+    /// </summary>
+    void SendForHighlight()
+    {
+        switch (selectedIndexes[0])
+        {
+            case 0:
+                //CellHighlighter.Instance.HighlightCells(ObjUpLeft, ObjMiddleLeft, ObjBottomLeft, ObjUpMid, ObjUpRight, selectedIndexes[1]);
+                cellHighlighter.HighlightCells(ObjUpLeft, ObjMiddleLeft, ObjBottomLeft, ObjUpMid, ObjUpRight, selectedIndexes[1]);
+                break;
+            case 1:
+                //CellHighlighter.Instance.HighlightCells(ObjUpMid, ObjMiddle, ObjBottomMid, ObjUpLeft, ObjUpRight, selectedIndexes[1]);
+                cellHighlighter.HighlightCells(ObjUpMid, ObjMiddle, ObjBottomMid, ObjUpLeft, ObjUpRight, selectedIndexes[1]);
+                break;
+            case 2:
+                //CellHighlighter.Instance.HighlightCells(ObjUpRight, ObjMiddleRight, ObjBottomRight, ObjUpLeft, ObjUpMid, selectedIndexes[1]);
+                cellHighlighter.HighlightCells(ObjUpRight, ObjMiddleRight, ObjBottomRight, ObjUpLeft, ObjUpMid, selectedIndexes[1]);
+                break;
+            case 3:
+                //CellHighlighter.Instance.HighlightCells(ObjMiddleLeft, ObjUpLeft, ObjBottomLeft, ObjMiddle, ObjMiddleRight, selectedIndexes[1]);
+                cellHighlighter.HighlightCells(ObjMiddleLeft, ObjUpLeft, ObjBottomLeft, ObjMiddle, ObjMiddleRight, selectedIndexes[1]);
+                break;
+            case 4:
+                //CellHighlighter.Instance.HighlightCells(ObjMiddle, ObjUpMid, ObjBottomMid, ObjMiddleLeft, ObjMiddleRight, selectedIndexes[1]);
+                cellHighlighter.HighlightCells(ObjMiddle, ObjUpMid, ObjBottomMid, ObjMiddleLeft, ObjMiddleRight, selectedIndexes[1]);
+                break;
+            case 5:
+                //CellHighlighter.Instance.HighlightCells(ObjMiddleRight, ObjUpRight, ObjBottomRight, ObjMiddleLeft, ObjMiddle, selectedIndexes[1]);
+                cellHighlighter.HighlightCells(ObjMiddleRight, ObjUpRight, ObjBottomRight, ObjMiddleLeft, ObjMiddle, selectedIndexes[1]);
+                break;
+            case 6:
+                //CellHighlighter.Instance.HighlightCells(ObjBottomLeft, ObjUpLeft, ObjMiddleLeft, ObjBottomMid, ObjBottomRight, selectedIndexes[1]);
+                cellHighlighter.HighlightCells(ObjBottomLeft, ObjUpLeft, ObjMiddleLeft, ObjBottomMid, ObjBottomRight, selectedIndexes[1]);
+                break;
+            case 7:
+                //CellHighlighter.Instance.HighlightCells(ObjBottomMid, ObjUpMid, ObjMiddle, ObjBottomLeft, ObjBottomRight, selectedIndexes[1]);
+                cellHighlighter.HighlightCells(ObjBottomMid, ObjUpMid, ObjMiddle, ObjBottomLeft, ObjBottomRight, selectedIndexes[1]);
+                break;
+            case 8:
+                //CellHighlighter.Instance.HighlightCells(ObjBottomRight, ObjUpRight, ObjMiddleRight, ObjBottomLeft, ObjBottomMid, selectedIndexes[1]);
+                cellHighlighter.HighlightCells(ObjBottomRight, ObjUpRight, ObjMiddleRight, ObjBottomLeft, ObjBottomMid, selectedIndexes[1]);
+                break;
+            default:
+                break;
+        }
+    }
+    void SendToNumberHighlighter(int hlSq, int hlCl)
+    {
+        int num = allSquares[hlSq][hlCl];
+        //NumberHighlighter.Instance.HighlightTheNumbers(allObjSquares, num);
+        numberHighlighter.HighlightTheNumbers(allObjSquares, num);
+    }
+    //************************************************************************************************************************************************
+
+
+
+    /// <summary>
+    /// Interface Methods..!
+    /// </summary>
+
+    public void Select(int i, int j)
+    {
+        CellSelected(i, j);
+    }
+    public void Highlight(int i, int j)
+    {
+        SendToNumberHighlighter(i, j);
+    }
+    //************************************************************************************************************************************************
+
+
+
+    /*void ListRefill(List<int> lst)
     {
         lst.Clear();
         lst.Add(1);
@@ -609,4 +744,19 @@ public class EasyGameManager : MonoBehaviour
         lst.Add(8);
         lst.Add(9);
     }
+    public void SetZero()
+    {
+        for (int i = 0; i < 9; i++)
+        {
+            UpLeft[i] = 0;
+            UpMid[i] = 0;
+            UpRight[i] = 0;
+            MiddleLeft[i] = 0;
+            Middle[i] = 0;
+            MiddleRight[i] = 0;
+            BottomLeft[i] = 0;
+            BottomMid[i] = 0;
+            BottomRight[i] = 0;
+        }
+    }*/
 }

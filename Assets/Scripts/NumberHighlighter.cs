@@ -5,30 +5,12 @@ using UnityEngine.UI;
 
 public class NumberHighlighter : MonoBehaviour
 {
-    public static NumberHighlighter Instance;
     List<int> squareBackup = new List<int>();
     List<int> cellBackup = new List<int>();
     List<Color> colorBackup = new List<Color>();
     int temp;
     bool CR_running = false;
     IEnumerator HlNum;
-    private void Awake()
-    {
-        if(Instance == null)
-        {
-            Instance = this;
-        }
-    }
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     public void HighlightTheNumbers(GameObject[][] allSqObj, int num)
     {
@@ -58,7 +40,6 @@ public class NumberHighlighter : MonoBehaviour
         CR_running = true;
         TurnOn(allSq);
         yield return new WaitForSeconds(2.5f);
-        Debug.Log("Wait..!!");
         TurnOff(allSq);
         squareBackup.Clear();
         cellBackup.Clear();

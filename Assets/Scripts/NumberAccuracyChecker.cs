@@ -4,14 +4,6 @@ using UnityEngine;
 
 public class NumberAccuracyChecker : MonoBehaviour
 {
-    public static NumberAccuracyChecker Instance;
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-    }
 
     public bool IsNumAccurate(int[] currSq, int[] ver1, int[] ver2, int[] hor1, int[] hor2, int currCell, int number)
     {

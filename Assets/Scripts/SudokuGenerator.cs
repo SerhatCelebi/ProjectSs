@@ -6,6 +6,8 @@ public class SudokuGenerator : MonoBehaviour
 {
     public static SudokuGenerator Instance;
 
+    NumberAccuracyChecker numberAccuracyChecker;
+
     public int[] Square0 = new int[9];
     public int[] Square1 = new int[9];
     public int[] Square2 = new int[9];
@@ -34,6 +36,10 @@ public class SudokuGenerator : MonoBehaviour
         Squares[7] = Square7;
         Squares[8] = Square8;
         FillFirstRow();
+    }
+    private void Start()
+    {
+        numberAccuracyChecker = gameObject.GetComponent<NumberAccuracyChecker>();
     }
     void Update()
     {
@@ -112,23 +118,23 @@ public class SudokuGenerator : MonoBehaviour
         switch (Sq)
         {
             case 0:
-                return NumberAccuracyChecker.Instance.IsNumAccurate(Square0, Square3, Square6, Square1, Square2, Cl, Nm);
+                return numberAccuracyChecker.IsNumAccurate(Square0, Square3, Square6, Square1, Square2, Cl, Nm);
             case 1:
-                return NumberAccuracyChecker.Instance.IsNumAccurate(Square1, Square4, Square7, Square0, Square2, Cl, Nm);
+                return numberAccuracyChecker.IsNumAccurate(Square1, Square4, Square7, Square0, Square2, Cl, Nm);
             case 2:
-                return NumberAccuracyChecker.Instance.IsNumAccurate(Square2, Square5, Square8, Square0, Square1, Cl, Nm);
+                return numberAccuracyChecker.IsNumAccurate(Square2, Square5, Square8, Square0, Square1, Cl, Nm);
             case 3:
-                return NumberAccuracyChecker.Instance.IsNumAccurate(Square3, Square0, Square6, Square4, Square5, Cl, Nm);
+                return numberAccuracyChecker.IsNumAccurate(Square3, Square0, Square6, Square4, Square5, Cl, Nm);
             case 4:
-                return NumberAccuracyChecker.Instance.IsNumAccurate(Square4, Square1, Square7, Square3, Square5, Cl, Nm);
+                return numberAccuracyChecker.IsNumAccurate(Square4, Square1, Square7, Square3, Square5, Cl, Nm);
             case 5:
-                return NumberAccuracyChecker.Instance.IsNumAccurate(Square5, Square2, Square8, Square3, Square4, Cl, Nm);
+                return numberAccuracyChecker.IsNumAccurate(Square5, Square2, Square8, Square3, Square4, Cl, Nm);
             case 6:
-                return NumberAccuracyChecker.Instance.IsNumAccurate(Square6, Square0, Square3, Square7, Square8, Cl, Nm);
+                return numberAccuracyChecker.IsNumAccurate(Square6, Square0, Square3, Square7, Square8, Cl, Nm);
             case 7:
-                return NumberAccuracyChecker.Instance.IsNumAccurate(Square7, Square1, Square4, Square6, Square8, Cl, Nm);
+                return numberAccuracyChecker.IsNumAccurate(Square7, Square1, Square4, Square6, Square8, Cl, Nm);
             case 8:
-                return NumberAccuracyChecker.Instance.IsNumAccurate(Square8, Square2, Square5, Square6, Square7, Cl, Nm);
+                return numberAccuracyChecker.IsNumAccurate(Square8, Square2, Square5, Square6, Square7, Cl, Nm);
             default:
                 Debug.Log("Square Not Found..!");
                 return false;

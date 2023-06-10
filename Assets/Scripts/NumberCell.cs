@@ -8,7 +8,7 @@ using UnityEngine.InputSystem;
 public class NumberCell : MonoBehaviour, IPointerClickHandler
 {
     public static NumberCell Instance;
-
+    GameObject gameManager;
     public int squareIndex;
     public int cellIndex;
     public bool isSolved;
@@ -25,7 +25,7 @@ public class NumberCell : MonoBehaviour, IPointerClickHandler
 
     void Start()
     {
-
+        gameManager = GameObject.FindGameObjectWithTag("GameManagement");
     }
     private void Update()
     {
@@ -84,18 +84,16 @@ public class NumberCell : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (!isSelected && !isSolved)
+        ISelectable select = gameManager.GetComponent<ISelectable>();
+        if(select != null)
         {
-            if(EasyGameManager.Instance != null)
+            if (!isSelected && !isSolved)
             {
-                EasyGameManager.Instance.CellSelected(squareIndex, cellIndex);
+                select.Select(squareIndex, cellIndex);
             }
-        }
-        else if (isSolved)
-        {
-            if(EasyGameManager.Instance != null)
+            else if (isSolved)
             {
-                EasyGameManager.Instance.SendToNumberHighlighter(squareIndex, cellIndex);
+                select.Highlight(squareIndex, cellIndex);
             }
         }
     }
