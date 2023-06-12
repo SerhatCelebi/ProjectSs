@@ -39,7 +39,8 @@ public class SudokuGenerator : MonoBehaviour
     }
     private void Start()
     {
-        numberAccuracyChecker = gameObject.GetComponent<NumberAccuracyChecker>();
+        //numberAccuracyChecker = gameObject.GetComponent<NumberAccuracyChecker>();
+        //numberAccuracyChecker = FindObjectOfType<NumberAccuracyChecker>();
     }
     void Update()
     {
@@ -100,7 +101,7 @@ public class SudokuGenerator : MonoBehaviour
 
         for(int num = 1; num <= 9; num++)
         {
-            if (IsNumSafe(tmpSq, tmpCl, num))
+            if (IsNumSafe2(tmpSq, tmpCl, num))
             {
                 Squares[tmpSq][tmpCl] = num;
                 if (GenerateSudoku(tmpSq, tmpCl + 1))
@@ -135,6 +136,34 @@ public class SudokuGenerator : MonoBehaviour
                 return numberAccuracyChecker.IsNumAccurate(Square7, Square1, Square4, Square6, Square8, Cl, Nm);
             case 8:
                 return numberAccuracyChecker.IsNumAccurate(Square8, Square2, Square5, Square6, Square7, Cl, Nm);
+            default:
+                Debug.Log("Square Not Found..!");
+                return false;
+        }
+    }
+    bool IsNumSafe2(int Sq, int Cl, int Nm)
+    {
+
+        switch (Sq)
+        {
+            case 0:
+                return gameObject.GetComponent<NumberAccuracyChecker>().IsNumAccurate(Square0, Square3, Square6, Square1, Square2, Cl, Nm);
+            case 1:
+                return gameObject.GetComponent<NumberAccuracyChecker>().IsNumAccurate(Square1, Square4, Square7, Square0, Square2, Cl, Nm);
+            case 2:
+                return gameObject.GetComponent<NumberAccuracyChecker>().IsNumAccurate(Square2, Square5, Square8, Square0, Square1, Cl, Nm);
+            case 3:
+                return gameObject.GetComponent<NumberAccuracyChecker>().IsNumAccurate(Square3, Square0, Square6, Square4, Square5, Cl, Nm);
+            case 4:
+                return gameObject.GetComponent<NumberAccuracyChecker>().IsNumAccurate(Square4, Square1, Square7, Square3, Square5, Cl, Nm);
+            case 5:
+                return gameObject.GetComponent<NumberAccuracyChecker>().IsNumAccurate(Square5, Square2, Square8, Square3, Square4, Cl, Nm);
+            case 6:
+                return gameObject.GetComponent<NumberAccuracyChecker>().IsNumAccurate(Square6, Square0, Square3, Square7, Square8, Cl, Nm);
+            case 7:
+                return gameObject.GetComponent<NumberAccuracyChecker>().IsNumAccurate(Square7, Square1, Square4, Square6, Square8, Cl, Nm);
+            case 8:
+                return gameObject.GetComponent<NumberAccuracyChecker>().IsNumAccurate(Square8, Square2, Square5, Square6, Square7, Cl, Nm);
             default:
                 Debug.Log("Square Not Found..!");
                 return false;

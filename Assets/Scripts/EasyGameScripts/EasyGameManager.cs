@@ -100,7 +100,10 @@ public class EasyGameManager : MonoBehaviour, ISelectable
     }
     void Update()
     {
-        
+        if (Input.GetButton("Jump"))
+        {
+            HintButton();
+        }
     }
 
     /// <summary>
@@ -132,6 +135,7 @@ public class EasyGameManager : MonoBehaviour, ISelectable
         isGameEnded = true;
         endGameScreen.SetActive(true);
         endGameText.text = "Score : " + score + "\n\nTime : " + tempMin + ":" + tempSec + "\n\nMistakes : " + mistakes;
+        AudioManager.Instance.Play("EndGame");
     }
     void GameOverCase()
     {
@@ -259,9 +263,9 @@ public class EasyGameManager : MonoBehaviour, ISelectable
     public void HintButton()
     {
         AudioManager.Instance.Play("Click");
-        if (!allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<NumberCell>().isSolved)
+        if (IsButtonAvailable() && isCellSelected)
         {
-            if (IsButtonAvailable() && isCellSelected)
+            if (!allObjSquares[selectedIndexes[0]][selectedIndexes[1]].GetComponent<NumberCell>().isSolved)
             {
                 if (hintCount > 0)
                 {
@@ -270,7 +274,7 @@ public class EasyGameManager : MonoBehaviour, ISelectable
                     allObjSquares[selectedIndexes[0]][selectedIndexes[1]].gameObject.GetComponent<NumberCell>().isSolved = true;
                     UpdateNumberCounter(allSquares[selectedIndexes[0]][selectedIndexes[1]], true);
                     UpdateNumberCounterText();
-                    //hintCount--;
+                    hintCount--;
                     hintCountText.text = hintCount.ToString();
                     isSquaresFilled[selectedIndexes[0]] = gameObject.GetComponent<FilledSquareChecker>().CheckSquareIsFilled(allObjSquares[selectedIndexes[0]]);
                     if (EndGameCheck())
@@ -292,10 +296,7 @@ public class EasyGameManager : MonoBehaviour, ISelectable
     public void BackToMenuButton()
     {
         AudioManager.Instance.Play("Click");
-        if (IsButtonAvailable())
-        {
-            SceneManager.LoadScene(0);
-        }
+        SceneManager.LoadScene(0);
     }
     public void Number1Button()
     {
@@ -514,12 +515,12 @@ public class EasyGameManager : MonoBehaviour, ISelectable
     {
         int tempSquare, tempCell;
         int tempHide = hideCount;
-        while (hideCount > 0)
+        while (tempHide > 0)
         {
             tempSquare = Random.Range(0, 9);
             tempCell = Random.Range(0, 9);
-            backupHiddenSquare[tempHide - hideCount] = tempSquare;
-            backupHiddenCell[tempHide - hideCount] = tempCell;
+            backupHiddenSquare[hideCount - tempHide] = tempSquare;
+            backupHiddenCell[hideCount - tempHide] = tempCell;
 
             switch (tempSquare)
             {
@@ -529,7 +530,7 @@ public class EasyGameManager : MonoBehaviour, ISelectable
                         ObjUpLeft[tempCell].GetComponent<Text>().text = " ";
                         ObjUpLeft[tempCell].GetComponent<NumberCell>().isSolved = false;
                         UpdateNumberCounter(UpLeft[tempCell], false);
-                        hideCount--;
+                        tempHide--;
                     }
                     break;
                 case 1:
@@ -538,7 +539,7 @@ public class EasyGameManager : MonoBehaviour, ISelectable
                         ObjUpMid[tempCell].GetComponent<Text>().text = " ";
                         ObjUpMid[tempCell].GetComponent<NumberCell>().isSolved = false;
                         UpdateNumberCounter(UpMid[tempCell], false);
-                        hideCount--;
+                        tempHide--;
                     }
                     break;
                 case 2:
@@ -547,7 +548,7 @@ public class EasyGameManager : MonoBehaviour, ISelectable
                         ObjUpRight[tempCell].GetComponent<Text>().text = " ";
                         ObjUpRight[tempCell].GetComponent<NumberCell>().isSolved = false;
                         UpdateNumberCounter(UpRight[tempCell], false);
-                        hideCount--;
+                        tempHide--;
                     }
                     break;
                 case 3:
@@ -556,7 +557,7 @@ public class EasyGameManager : MonoBehaviour, ISelectable
                         ObjMiddleLeft[tempCell].GetComponent<Text>().text = " ";
                         ObjMiddleLeft[tempCell].GetComponent<NumberCell>().isSolved = false;
                         UpdateNumberCounter(MiddleLeft[tempCell], false);
-                        hideCount--;
+                        tempHide--;
                     }
                     break;
                 case 4:
@@ -565,7 +566,7 @@ public class EasyGameManager : MonoBehaviour, ISelectable
                         ObjMiddle[tempCell].GetComponent<Text>().text = " ";
                         ObjMiddle[tempCell].GetComponent<NumberCell>().isSolved = false;
                         UpdateNumberCounter(Middle[tempCell], false);
-                        hideCount--;
+                        tempHide--;
                     }
                     break;
                 case 5:
@@ -574,7 +575,7 @@ public class EasyGameManager : MonoBehaviour, ISelectable
                         ObjMiddleRight[tempCell].GetComponent<Text>().text = " ";
                         ObjMiddleRight[tempCell].GetComponent<NumberCell>().isSolved = false;
                         UpdateNumberCounter(MiddleRight[tempCell], false);
-                        hideCount--;
+                        tempHide--;
                     }
                     break;
                 case 6:
@@ -583,7 +584,7 @@ public class EasyGameManager : MonoBehaviour, ISelectable
                         ObjBottomLeft[tempCell].GetComponent<Text>().text = " ";
                         ObjBottomLeft[tempCell].GetComponent<NumberCell>().isSolved = false;
                         UpdateNumberCounter(BottomLeft[tempCell], false);
-                        hideCount--;
+                        tempHide--;
                     }
                     break;
                 case 7:
@@ -592,7 +593,7 @@ public class EasyGameManager : MonoBehaviour, ISelectable
                         ObjBottomMid[tempCell].GetComponent<Text>().text = " ";
                         ObjBottomMid[tempCell].GetComponent<NumberCell>().isSolved = false;
                         UpdateNumberCounter(BottomMid[tempCell], false);
-                        hideCount--;
+                        tempHide--;
                     }
                     break;
                 case 8:
@@ -601,7 +602,7 @@ public class EasyGameManager : MonoBehaviour, ISelectable
                         ObjBottomRight[tempCell].GetComponent<Text>().text = " ";
                         ObjBottomRight[tempCell].GetComponent<NumberCell>().isSolved = false;
                         UpdateNumberCounter(BottomRight[tempCell], false);
-                        hideCount--;
+                        tempHide--;
                     }
                     break;
                 default:

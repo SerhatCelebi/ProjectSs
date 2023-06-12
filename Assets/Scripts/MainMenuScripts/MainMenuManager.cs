@@ -13,7 +13,14 @@ public class MainMenuManager : MonoBehaviour
 
     [SerializeField] private Vector3 endTransform = new Vector3(0f, 0f, 0f), startTransform = new Vector3(0f, -960f, 0f);
     [SerializeField] private float LerpValue = 0f;
-    
+    private void Start()
+    {
+        AudioManager.Instance.Play("Theme");
+    }
+    public void ExitButton()
+    {
+        Application.Quit();
+    }
     public void EasyGameButton()
     {
         SceneManager.LoadScene(1);
@@ -52,12 +59,12 @@ public class MainMenuManager : MonoBehaviour
     public void AgainstTimeButton()
     {
         //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
-        StartCoroutine(SetOnDifficultyScreen(startTransform, endTransform, 1f));
+        StartCoroutine(SetOnDifficultyScreen(startTransform, endTransform, 0.3f));
         AudioManager.Instance.Play("Click");
     }
     public void CloseDifficultyButton()
     {
-        StartCoroutine(SetOffDifficultyScreen(endTransform, startTransform, 1f));
+        StartCoroutine(SetOffDifficultyScreen(endTransform, startTransform, 0.3f));
         AudioManager.Instance.Play("Click");
     }
 
